@@ -146,7 +146,7 @@ leastPowerful <- powerTable %>%
                                "5. Conjunctive IU Test (t-Dist)" = "method5_T",
                                "5. Conjunctive IU Test (MVN-Dist)" = "method5_MVN"))
 View(leastPowerful)
-write.csv(leastPowerful, file = "./Results/F/LeastPowerful.csv")
+write.csv(leastPowerful, file = "./Results/Chi2/LeastPowerful.csv")
 
 # Histogram of power results for methods
 powerLong <- powerTable %>%
