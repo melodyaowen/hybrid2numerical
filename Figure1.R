@@ -1,5 +1,7 @@
 require(latex2exp)
 
+# Figure 1. Critical values of central X^2 distribution with 1-DF and 2-DF
+
 critValueData34 <- data.frame(alpha = seq(from = 0.001, to = 0.999, by = 0.001)) %>%
   mutate(`c4` = qchisq(p = alpha, df = 1,
                      ncp = 0, lower.tail = FALSE),

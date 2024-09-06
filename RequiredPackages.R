@@ -3,7 +3,7 @@
 # Package names
 packages <- c("tidyverse", "lme4", "MASS", "Matrix", "matrixcalc",
               "ICC", "nlme", "bindata", "gee", "crt2power", "mosaic",
-              "tmvtnorm", "ggplot2", "latex2exp")
+              "tmvtnorm", "ggplot2", "latex2exp", "reshape2", "gridExtra")
 
 # Install packages not yet installed
 installed_packages <- packages %in% rownames(installed.packages())

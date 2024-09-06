@@ -1,3 +1,4 @@
+# Figure 2: Comparison of the Marcum Q-functions 1/2 and 1
 
 # Creating Marcum Q data to compare and find threshold
 ncpEqualData <- expand.grid(c3 = seq(0, 15, by = 0.05),
