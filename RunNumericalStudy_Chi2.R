@@ -96,28 +96,46 @@ View(scenarios100)
 methodList <- c("method1_bonf", "method1_sidak", "method1_dap",
                 "method2", "method3", "method4_Chi2",
                 "method5_T", "method5_MVN")
+# mostPowerful <- powerTable %>%
+#   pivot_longer(cols = c("method1_bonf", "method1_sidak", "method1_dap",
+#                         "method2", "method3", "method4_Chi2",
+#                         "method5_T", "method5_MVN"), names_to = "Method",
+#                values_to = "Power") %>%
+#   group_by(Scenario) %>%
+#   slice(which.max(Power)) %>%
+#   ungroup() %>%
+#   group_by(Method) %>%
+#   summarize(n = n()) %>%
+#   mutate(Method = factor(Method, levels = methodList)) %>%
+#   complete(Method = levels(Method), fill = list(n = 0)) %>%
+#   mutate(Percent = paste0(round((n/nrow(numParameters))*100, 2), "%")) %>%
+#   mutate("Method" = fct_recode(Method,
+#                                "1. P-Value Adjustment (Bonferroni)" = "method1_bonf",
+#                                "1. P-Value Adjustment (Sidak)" = "method1_sidak",
+#                                "1. P-Value Adjustment (D/AP)" = "method1_dap",
+#                                "2. Combined Outcomes" = "method2",
+#                                "3. Single 1-DF Test" = "method3",
+#                                "4. Disjunctive 2-DF" = "method4_Chi2",
+#                                "5. Conjunctive IU Test (t-Dist)" = "method5_T",
+#                                "5. Conjunctive IU Test (MVN-Dist)" = "method5_MVN"))
+# View(mostPowerful)
+
 mostPowerful <- powerTable %>%
   pivot_longer(cols = c("method1_bonf", "method1_sidak", "method1_dap",
                         "method2", "method3", "method4_Chi2",
                         "method5_T", "method5_MVN"), names_to = "Method",
                values_to = "Power") %>%
   group_by(Scenario) %>%
-  slice(which.max(Power)) %>%
-  ungroup() %>%
-  group_by(Method) %>%
+  filter(Power == max(Power)) %>%
+  mutate(unique_id = row_number()) %>%
+  pivot_wider(names_from = unique_id, values_from = c("Method", "Power")) %>%
+  group_by(Method_1, Method_2) %>%
   summarize(n = n()) %>%
-  mutate(Method = factor(Method, levels = methodList)) %>%
-  complete(Method = levels(Method), fill = list(n = 0)) %>%
-  mutate(Percent = paste0(round((n/nrow(numParameters))*100, 2), "%")) %>%
-  mutate("Method" = fct_recode(Method,
-                               "1. P-Value Adjustment (Bonferroni)" = "method1_bonf",
-                               "1. P-Value Adjustment (Sidak)" = "method1_sidak",
-                               "1. P-Value Adjustment (D/AP)" = "method1_dap",
-                               "2. Combined Outcomes" = "method2",
-                               "3. Single 1-DF Test" = "method3",
-                               "4. Disjunctive 2-DF" = "method4_Chi2",
-                               "5. Conjunctive IU Test (t-Dist)" = "method5_T",
-                               "5. Conjunctive IU Test (MVN-Dist)" = "method5_MVN"))
+  ungroup() %>%
+  mutate(Method_1 = factor(Method_1, levels = methodList)) %>%
+  complete(Method_1 = levels(Method_1), fill = list(n = 0)) %>%
+  mutate(Percent = paste0(round((n/nrow(numParameters))*100, 2), "%"))
+
 View(mostPowerful)
 
 write.csv(mostPowerful, file = "./Results/Chi2/MostPowerful.csv")
@@ -129,22 +147,16 @@ leastPowerful <- powerTable %>%
                         "method5_T", "method5_MVN"), names_to = "Method",
                values_to = "Power") %>%
   group_by(Scenario) %>%
-  slice(which.min(Power)) %>%
-  ungroup() %>%
-  group_by(Method) %>%
+  filter(Power == min(Power)) %>%
+  mutate(unique_id = row_number()) %>%
+  pivot_wider(names_from = unique_id, values_from = c("Method", "Power")) %>%
+  group_by(Method_1, Method_2) %>%
   summarize(n = n()) %>%
-  mutate(Method = factor(Method, levels = methodList)) %>%
-  complete(Method = levels(Method), fill = list(n = 0)) %>%
-  mutate(Percent = paste0(round((n/nrow(numParameters))*100, 2), "%")) %>%
-  mutate("Method" = fct_recode(Method,
-                               "1. P-Value Adjustment (Bonferroni)" = "method1_bonf",
-                               "1. P-Value Adjustment (Sidak)" = "method1_sidak",
-                               "1. P-Value Adjustment (D/AP)" = "method1_dap",
-                               "2. Combined Outcomes" = "method2",
-                               "3. Single 1-DF Test" = "method3",
-                               "4. Disjunctive 2-DF" = "method4_Chi2",
-                               "5. Conjunctive IU Test (t-Dist)" = "method5_T",
-                               "5. Conjunctive IU Test (MVN-Dist)" = "method5_MVN"))
+  ungroup() %>%
+  mutate(Method_1 = factor(Method_1, levels = methodList)) %>%
+  complete(Method_1 = levels(Method_1), fill = list(n = 0)) %>%
+  mutate(Percent = paste0(round((n/nrow(numParameters))*100, 2), "%"))
+
 View(leastPowerful)
 write.csv(leastPowerful, file = "./Results/Chi2/LeastPowerful.csv")
 
@@ -256,6 +268,39 @@ heatmap_plot <- ggplot(rank_summary_melted, aes(x = Method, y = Scenario, fill =
   annotation_custom(grob = table_grob,
                     xmin = 7, xmax = 13.1, ymin = -400, ymax = 600)  # Adjust these values to place the table
 print(heatmap_plot)
+
+
+# Boxplots for differences in betas, sigmas, rhos
+diffData <- powerTable %>%
+  mutate(`rho02 - rho01` = rho02 - rho01,
+         `Var(Y2) - Var(Y1)` = varY2 - varY1,
+         `Beta2 - Beta1` = beta2 - beta1) %>%
+  pivot_longer(cols = starts_with("method"),
+               names_to = "Method", values_to = "Power") %>%
+  pivot_longer(cols = c("rho02 - rho01", "Var(Y2) - Var(Y1)", "Beta2 - Beta1"),
+               names_to = "Variable", values_to = "Difference") %>%
+  mutate(Variable = paste0(Variable, " = ", Difference)) %>%
+  dplyr::select(-Difference) %>%
+  arrange(Variable)
+
+ggplot(diffData, aes(x = Power, y = Method, group = Method, fill = Method)) +
+  geom_boxplot() + facet_wrap(~Variable)
+
+# Boxplots for K and m
+sizeData <- powerTable %>%
+  arrange(K, m) %>%
+  mutate(`Sample Size` = paste0("K = ", K, ", m = ", m),
+         `Sample Size` = factor(`Sample Size`, levels = c("K = 6, m = 50",
+                                                          "K = 6, m = 70",
+                                                          "K = 8, m = 50",
+                                                          "K = 8, m = 70",
+                                                          "K = 10, m = 50",
+                                                          "K = 10, m = 70"))) %>%
+  pivot_longer(cols = starts_with("method"),
+               names_to = "Method", values_to = "Power")
+
+ggplot(sizeData, aes(x = Power, y = Method, group = Method, fill = Method)) +
+  geom_boxplot() + facet_wrap(~`Sample Size`, ncol = 2)
 
 # Most Powerful Methods --------------------------------------------------------
 
