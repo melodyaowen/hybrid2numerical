@@ -138,7 +138,7 @@ mostPowerful <- powerTable %>%
 
 View(mostPowerful)
 
-write.csv(mostPowerful, file = "./Results/Chi2/MostPowerful.csv")
+#write.csv(mostPowerful, file = "./Results/Chi2/MostPowerful.csv")
 
 # Frequency of how many times a method is least powerful
 leastPowerful <- powerTable %>%
@@ -150,7 +150,7 @@ leastPowerful <- powerTable %>%
   filter(Power == min(Power)) %>%
   mutate(unique_id = row_number()) %>%
   pivot_wider(names_from = unique_id, values_from = c("Method", "Power")) %>%
-  group_by(Method_1, Method_2) %>%
+  group_by(Method_1) %>%
   summarize(n = n()) %>%
   ungroup() %>%
   mutate(Method_1 = factor(Method_1, levels = methodList)) %>%
@@ -281,14 +281,39 @@ diffData <- powerTable %>%
                names_to = "Variable", values_to = "Difference") %>%
   mutate(Variable = paste0(Variable, " = ", Difference)) %>%
   dplyr::select(-Difference) %>%
-  arrange(Variable)
+  arrange(Variable) %>%
+  mutate(Method = recode(Method,
+                         "method3" = "3. Single 1-DF Weighted",
+                         "method2" = "2. Combined Outcomes",
+                         "method4_Chi2" = "4. Disj. 2-DF (Chi2)",
+                         "method5_MVN" = "5. Conj. IU (MVN)",
+                         "method5_T" = "5. Conj. IU (T)",
+                         "method1_dap" = "1. P-Val Adj. (D/AP)",
+                         "method1_sidak" = "1. P-Val Adj. (Sidak)",
+                         "method1_bonf" = "1. P-Val Adj. (Bonf.)")) %>%
+  mutate(`Variable` = factor(`Variable`,
+                             levels = c("Beta2 - Beta1 = 0",
+                                        "Var(Y2) - Var(Y1) = -0.5",
+                                        "rho02 - rho01 = -0.05",
 
-ggplot(diffData, aes(x = Power, y = Method, group = Method, fill = Method)) +
-  geom_boxplot() + facet_wrap(~Variable)
+                                        "Beta2 - Beta1 = 0.15",
+                                        "Var(Y2) - Var(Y1) = 0",
+                                        "rho02 - rho01 = 0",
+
+                                        "Beta2 - Beta1 = 0.3",
+                                        "Var(Y2) - Var(Y1) = 0.5",
+                                        "rho02 - rho01 = 0.05")))
+
+ggplot(diffData, aes(x = Power, y = reorder(Method, Power, FUN = mean),
+                     group = Method, fill = Method)) +
+  geom_boxplot() + facet_wrap(~Variable) + guides(fill = "none") +
+  theme(text = element_text(size = 15)) + ylab("Design Method")
 
 # Boxplots for K and m
 sizeData <- powerTable %>%
   arrange(K, m) %>%
+  mutate(m = paste0("m = ", m),
+         K = as.factor(K)) %>%
   mutate(`Sample Size` = paste0("K = ", K, ", m = ", m),
          `Sample Size` = factor(`Sample Size`, levels = c("K = 6, m = 50",
                                                           "K = 6, m = 70",
@@ -297,10 +322,44 @@ sizeData <- powerTable %>%
                                                           "K = 10, m = 50",
                                                           "K = 10, m = 70"))) %>%
   pivot_longer(cols = starts_with("method"),
-               names_to = "Method", values_to = "Power")
+               names_to = "Method", values_to = "Power") %>%
+  mutate(Method = recode(Method,
+                         "method3" = "3. Single 1-DF Weighted",
+                         "method2" = "2. Combined Outcomes",
+                         "method4_Chi2" = "4. Disj. 2-DF (Chi2)",
+                         "method5_MVN" = "5. Conj. IU (MVN)",
+                         "method5_T" = "5. Conj. IU (T)",
+                         "method1_dap" = "1. P-Val Adj. (D/AP)",
+                         "method1_sidak" = "1. P-Val Adj. (Sidak)",
+                         "method1_bonf" = "1. P-Val Adj. (Bonf.)"))
 
-ggplot(sizeData, aes(x = Power, y = Method, group = Method, fill = Method)) +
-  geom_boxplot() + facet_wrap(~`Sample Size`, ncol = 2)
+ggplot(sizeData, aes(x = Power, y = reorder(Method, Power, FUN = mean),
+                     group = interaction(Method, K), fill = K)) +
+  geom_boxplot() + facet_wrap(~m, ncol = 2) +
+  theme(text = element_text(size = 15)) + ylab("Design Method")
+
+# Plot for rho1 and rho2
+rhoData <- powerTable %>%
+  arrange(rho1, rho2) %>%
+  mutate(rho2 = as.factor(rho2),
+         rho1 = paste0("rho1 = ", rho1)) %>%
+  pivot_longer(cols = starts_with("method"),
+               names_to = "Method", values_to = "Power") %>%
+  mutate(Method = recode(Method,
+                         "method3" = "3. Single 1-DF Weighted",
+                         "method2" = "2. Combined Outcomes",
+                         "method4_Chi2" = "4. Disj. 2-DF (Chi2)",
+                         "method5_MVN" = "5. Conj. IU (MVN)",
+                         "method5_T" = "5. Conj. IU (T)",
+                         "method1_dap" = "1. P-Val Adj. (D/AP)",
+                         "method1_sidak" = "1. P-Val Adj. (Sidak)",
+                         "method1_bonf" = "1. P-Val Adj. (Bonf.)"))
+
+ggplot(rhoData, aes(x = Power, y = reorder(Method, Power, FUN = mean),
+                    group = interaction(Method, rho2), fill = rho2)) +
+  geom_boxplot() +
+  facet_wrap(~rho1, ncol = 4) +
+  theme(text = element_text(size = 15)) + ylab("Design Method")
 
 # Most Powerful Methods --------------------------------------------------------
 
@@ -390,5 +449,5 @@ View(allBest)
 View(allBestRaw)
 View(allBestCases)
 
-write.csv(allBestRaw, file = "./Results/Chi2/BestAll_Raw.csv")
-write.csv(allBestCases, file = "./Results/Chi2/BestAll_Cases.csv")
+#write.csv(allBestRaw, file = "./Results/Chi2/BestAll_Raw.csv")
+#write.csv(allBestCases, file = "./Results/Chi2/BestAll_Cases.csv")
