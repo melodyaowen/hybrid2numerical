@@ -91,6 +91,20 @@ scenarios100 <- powerTable %>%
 nrow(scenarios100)
 View(scenarios100)
 
+# Check for cases where methods 2, 3, and 4 are not better than all of method 1
+# They should all return "Yes"
+unique(mutate(powerTable, method2biggerthan1 = ifelse(method2 > method1_bonf, "Yes", "No"))$method2biggerthan1)
+unique(mutate(powerTable, method2biggerthan1 = ifelse(method2 > method1_sidak, "Yes", "No"))$method2biggerthan1)
+unique(mutate(powerTable, method2biggerthan1 = ifelse(method2 > method1_dap, "Yes", "No"))$method2biggerthan1)
+
+unique(mutate(powerTable, method3biggerthan1 = ifelse(method3 > method1_bonf, "Yes", "No"))$method3biggerthan1)
+unique(mutate(powerTable, method3biggerthan1 = ifelse(method3 > method1_sidak, "Yes", "No"))$method3biggerthan1)
+unique(mutate(powerTable, method3biggerthan1 = ifelse(method3 > method1_dap, "Yes", "No"))$method3biggerthan1)
+
+unique(mutate(powerTable, method4biggerthan1 = ifelse(method4_Chi2 > method1_bonf, "Yes", "No"))$method4biggerthan1)
+unique(mutate(powerTable, method4biggerthan1 = ifelse(method4_Chi2 > method1_sidak, "Yes", "No"))$method4biggerthan1)
+unique(mutate(powerTable, method4biggerthan1 = ifelse(method4_Chi2 > method1_dap, "Yes", "No"))$method4biggerthan1)
+
 # Visualizations ---------------------------------------------------------------
 # Frequency of how many times a method is most powerful
 methodList <- c("method1_bonf", "method1_sidak", "method1_dap",

@@ -71,7 +71,7 @@ powerTable_Rho1 <- numParameters_Rho1 %>%
                                             r = r, dist = "MVN")) %>%
   mutate_at(vars(contains('method')), funs(.*100))
 
-View(powerTable_Rho1)
+#View(powerTable_Rho1)
 
 plotData_Rho1 <- powerTable_Rho1 %>%
   pivot_longer(cols = c("method1_bonf", "method1_sidak", "method1_dap",
@@ -92,12 +92,13 @@ plotData_Rho1 <- powerTable_Rho1 %>%
 rho1_graph <- ggplot(plotData_Rho1, aes(x = rho1, y = Power,
                                         group = Method, color = Method)) +
   geom_line(linewidth = 1) +
-  theme(text = element_text(size = 15)) + xlab(expression(rho[1]))
-rho1_graph
+  theme(text = element_text(size = 15)) +
+  xlab(expression(rho[1]^{paste("(", 1, ",", 2, ")")}))
+#rho1_graph
 
-ggsave(filename = "~/Desktop/2. Hybrid Software and Simulation/Word Drafts/Figures/Line Graphs/rho1_plot.png",
-       plot = rho1_graph,
-       width = 10, height = 6, dpi = 300)
+#ggsave(filename = "~/Desktop/2. Hybrid Software and Simulation/Word Drafts/Figures/Line Graphs/rho1_plot.png",
+#       plot = rho1_graph,
+#       width = 10, height = 6, dpi = 300)
 
 # Varying Rho2 -----------------------------------------------------------------
 # Table of all Parameters
@@ -170,7 +171,7 @@ powerTable_Rho2 <- numParameters_Rho2 %>%
                                             r = r, dist = "MVN")) %>%
   mutate_at(vars(contains('method')), funs(.*100))
 
-View(powerTable_Rho2)
+#View(powerTable_Rho2)
 
 plotData_Rho2 <- powerTable_Rho2 %>%
   pivot_longer(cols = c("method1_bonf", "method1_sidak", "method1_dap",
@@ -191,13 +192,14 @@ plotData_Rho2 <- powerTable_Rho2 %>%
 rho2_graph <- ggplot(plotData_Rho2, aes(x = rho2, y = Power,
                                         group = Method, color = Method)) +
   geom_line(linewidth = 1) +
-  theme(text = element_text(size = 15)) + xlab(expression(rho[2]))
+  theme(text = element_text(size = 15)) +
+  xlab(expression(rho[2]^{paste("(", 1, ",", 2, ")")}))
 
-rho2_graph
+#rho2_graph
 
-ggsave(filename = "~/Desktop/2. Hybrid Software and Simulation/Word Drafts/Figures/Line Graphs/rho2_plot.png",
-       plot = rho2_graph,
-       width = 10, height = 6, dpi = 300)
+#ggsave(filename = "~/Desktop/2. Hybrid Software and Simulation/Word Drafts/Figures/Line Graphs/rho2_plot.png",
+#       plot = rho2_graph,
+#       width = 10, height = 6, dpi = 300)
 
 # Varying Betas -----------------------------------------------------------------
 # Table of all Parameters
@@ -270,7 +272,7 @@ powerTable_Betas <- numParameters_Betas %>%
                                             r = r, dist = "MVN")) %>%
   mutate_at(vars(contains('method')), funs(.*100))
 
-View(powerTable_Betas)
+#View(powerTable_Betas)
 
 plotData_Betas <- powerTable_Betas %>%
   mutate(BetaRatio = beta2/beta1) %>%
@@ -294,11 +296,11 @@ betas_graph <- ggplot(plotData_Betas, aes(x = BetaRatio, y = Power,
   geom_line(linewidth = 1) +
   theme(text = element_text(size = 15)) + xlab(expression(beta[2]/beta[1]))
 
-betas_graph
+#betas_graph
 
-ggsave(filename = "~/Desktop/2. Hybrid Software and Simulation/Word Drafts/Figures/Line Graphs/betas_plot.png",
-       plot = betas_graph,
-       width = 10, height = 6, dpi = 300)
+#ggsave(filename = "~/Desktop/2. Hybrid Software and Simulation/Word Drafts/Figures/Line Graphs/betas_plot.png",
+#       plot = betas_graph,
+#       width = 10, height = 6, dpi = 300)
 
 # Varying ICCs -----------------------------------------------------------------
 # Table of all Parameters
@@ -371,7 +373,7 @@ powerTable_ICCs <- numParameters_ICCs %>%
                                             r = r, dist = "MVN")) %>%
   mutate_at(vars(contains('method')), funs(.*100))
 
-View(powerTable_ICCs)
+#View(powerTable_ICCs)
 
 plotData_ICCs <- powerTable_ICCs %>%
   mutate(ICCsRatio = rho02/rho01) %>%
@@ -396,11 +398,11 @@ ICCs_graph <- ggplot(plotData_ICCs, aes(x = ICCsRatio, y = Power,
   theme(text = element_text(size = 15)) +
   xlab(expression(rho[0]^{(2)} / rho[0]^{(1)}))
 
-ICCs_graph
+#ICCs_graph
 
-ggsave(filename = "~/Desktop/2. Hybrid Software and Simulation/Word Drafts/Figures/Line Graphs/ICCs_plot.png",
-       plot = ICCs_graph,
-       width = 10, height = 6, dpi = 300)
+#ggsave(filename = "~/Desktop/2. Hybrid Software and Simulation/Word Drafts/Figures/Line Graphs/ICCs_plot.png",
+#       plot = ICCs_graph,
+#       width = 10, height = 6, dpi = 300)
 
 # Varying Vars -----------------------------------------------------------------
 # Table of all Parameters
@@ -473,7 +475,7 @@ powerTable_Vars <- numParameters_Vars %>%
                                             r = r, dist = "MVN")) %>%
   mutate_at(vars(contains('method')), funs(.*100))
 
-View(powerTable_Vars)
+#View(powerTable_Vars)
 
 plotData_Vars <- powerTable_Vars %>%
   mutate(VarsRatio = varY2/varY1) %>%
@@ -498,15 +500,15 @@ vars_graph <- ggplot(plotData_Vars, aes(x = VarsRatio, y = Power,
   theme(text = element_text(size = 15)) +
   xlab(expression(sigma[2]^{2} / sigma[1]^{2}))
 
-vars_graph
+#vars_graph
 
-ggsave(filename = "~/Desktop/2. Hybrid Software and Simulation/Word Drafts/Figures/Line Graphs/vars_plot.png",
-       plot = vars_graph,
-       width = 10, height = 6, dpi = 300)
+#ggsave(filename = "~/Desktop/2. Hybrid Software and Simulation/Word Drafts/Figures/Line Graphs/vars_plot.png",
+#       plot = vars_graph,
+#       width = 10, height = 6, dpi = 300)
 
 # Varying K -----------------------------------------------------------------
 # Table of all Parameters
-numParameters_K <- expand.grid(K = c(4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24),
+numParameters_K <- expand.grid(K = c(4, 6, 8, 10, 12, 14, 16, 18, 20), #c(4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24),
                                   m = 50,
                                   betas = c(paste("0.4 0.4")),
                                   vars = paste("1 1"),
@@ -575,7 +577,7 @@ powerTable_K <- numParameters_K %>%
                                             r = r, dist = "MVN")) %>%
   mutate_at(vars(contains('method')), funs(.*100))
 
-View(powerTable_K)
+#View(powerTable_K)
 
 plotData_K <- powerTable_K %>%
   pivot_longer(cols = c("method1_bonf", "method1_sidak", "method1_dap",
@@ -598,11 +600,11 @@ K_graph <- ggplot(plotData_K, aes(x = K, y = Power,
   geom_line(linewidth = 1) +
   theme(text = element_text(size = 15))
 
-K_graph
+#K_graph
 
-ggsave(filename = "~/Desktop/2. Hybrid Software and Simulation/Word Drafts/Figures/Line Graphs/K_plot.png",
-       plot = K_graph,
-       width = 10, height = 6, dpi = 300)
+#ggsave(filename = "~/Desktop/2. Hybrid Software and Simulation/Word Drafts/Figures/Line Graphs/K_plot.png",
+#       plot = K_graph,
+#       width = 10, height = 6, dpi = 300)
 
 
 # Varying m -----------------------------------------------------------------
@@ -676,7 +678,7 @@ powerTable_m <- numParameters_m %>%
                                             r = r, dist = "MVN")) %>%
   mutate_at(vars(contains('method')), funs(.*100))
 
-View(powerTable_m)
+#View(powerTable_m)
 
 plotData_m <- powerTable_m %>%
   pivot_longer(cols = c("method1_bonf", "method1_sidak", "method1_dap",
@@ -699,10 +701,78 @@ m_graph <- ggplot(plotData_m, aes(x = m, y = Power,
   geom_line(linewidth = 1) +
   theme(text = element_text(size = 15))
 
-m_graph
+#m_graph
 
-ggsave(filename = "~/Desktop/2. Hybrid Software and Simulation/Word Drafts/Figures/Line Graphs/m_plot.png",
-       plot = m_graph,
+#ggsave(filename = "~/Desktop/2. Hybrid Software and Simulation/Word Drafts/Figures/Line Graphs/m_plot.png",
+#       plot = m_graph,
+#       width = 10, height = 6, dpi = 300)
+
+
+# Combined Plot of rho1, rho2, rho01, rho02 ------------------------------------
+
+latex_labels <- c(
+  rho1 = "rho[1]^{(1~`,`~2)}",
+  rho2 = "rho[2]^{(1~`,`~2)}",
+  ICCsRatio = "rho[0]^{(2)} / rho[0]^{(1)}"
+)
+
+combinedData <- plotData_Rho1 %>%
+  mutate(Plot = "rho1",
+         ICCsRatio = NA) %>%
+  bind_rows(., mutate(plotData_Rho2, Plot = "rho2",
+                      ICCsRatio = NA)) %>%
+  bind_rows(., mutate(plotData_ICCs, Plot = "ICCsRatio")) %>%
+  pivot_longer(cols = c(rho1, rho2, ICCsRatio), names_to = "Variable",
+               values_to = "Value") %>%
+  filter(Plot == Variable) %>%
+  mutate(Variable = factor(Variable, levels = c("rho1", "rho2", "ICCsRatio")))
+
+combined_graph_1 <- ggplot(combinedData, aes(x = Value, y = Power,
+                                             group = Method, color = Method)) +
+  geom_line(linewidth = .7) + theme(text = element_text(size = 15)) +
+  facet_wrap(~Variable, scales = "free_x", ncol = 2,
+             labeller = as_labeller(latex_labels, label_parsed)) +
+  theme(strip.text = element_text(size = 15))
+
+combined_graph_1
+
+ggsave(filename = "~/Desktop/2. Hybrid Software and Simulation/Word Drafts/Figures/Line Graphs/combined_plot_1.png",
+      plot = combined_graph_1,
+      width = 10, height = 6, dpi = 300)
+
+# Combined Plot of betas, varY1, varY2, K, m ----------------------
+
+latex_labels_2 <- c(
+  K = "K",
+  m = "m",
+  BetaRatio = "beta[2] / beta[1]",
+  VarsRatio = "sigma[2]^2 / sigma[1]^2"
+)
+
+combinedData2 <- plotData_Betas %>%
+  mutate(Plot = "BetaRatio",
+         VarsRatio = NA) %>%
+  bind_rows(., mutate(plotData_Vars, Plot = "VarsRatio",
+                      BetaRatio = NA)) %>%
+  bind_rows(., mutate(plotData_K, VarsRatio = NA, BetaRatio = NA, Plot = "K")) %>%
+  bind_rows(., mutate(plotData_m, VarsRatio = NA, BetaRatio = NA, Plot = "m")) %>%
+  pivot_longer(cols = c(K, m, BetaRatio, VarsRatio), names_to = "Variable",
+               values_to = "Value") %>%
+  filter(Plot == Variable) %>%
+  mutate(Variable = factor(Variable, levels = c("BetaRatio", "VarsRatio", "K", "m")))
+
+combined_graph_2 <- ggplot(combinedData2, aes(x = Value, y = Power,
+                                             group = Method, color = Method)) +
+  geom_line(linewidth = .7) + theme(text = element_text(size = 15)) +
+  facet_wrap(~Variable, scales = "free_x",
+             labeller = as_labeller(latex_labels_2, label_parsed)) +
+  theme(strip.text = element_text(size = 15))
+
+combined_graph_2
+
+ggsave(filename = "~/Desktop/2. Hybrid Software and Simulation/Word Drafts/Figures/Line Graphs/combined_plot_2.png",
+       plot = combined_graph_2,
        width = 10, height = 6, dpi = 300)
+
 
 
