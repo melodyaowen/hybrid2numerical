@@ -26,6 +26,7 @@ method14dat <- expand.grid(lambda1 = seq(1, 30, by = 0.5),
          `D/AP Correction` = Disjunctive - DAP) %>%
   pivot_longer(cols = c(`Bonferroni Correction`, `Sidak Correction`, `D/AP Correction`),
                names_to = "Methods", values_to = "PowerDiff") %>%
+  mutate(PowerDiff = round(PowerDiff, 4)) %>%
   mutate(Method4Bigger = ifelse(PowerDiff > 0, "True", ifelse(PowerDiff < 0, "False", "Equal")))
 
 plot14data1 <- method14dat %>%
