@@ -1,7 +1,7 @@
 # Run this before any other code to make sure all packages are installed and loaded
 
 # Package names
-packages <- c("tidyverse", "lme4", "MASS", "Matrix", "matrixcalc",
+packages <- c("tidyverse", "lme4", "MASS", "Matrix", "matrixcalc", "latex2exp",
               "ICC", "nlme", "bindata", "gee", "crt2power", "mosaic",
               "tmvtnorm", "ggplot2", "latex2exp", "reshape2", "gridExtra")
 

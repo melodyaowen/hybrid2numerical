@@ -38,6 +38,34 @@ ggplot(data = ncpEqualData_filtered, #dplyr::filter(ncpEqualData, NCP == 5),
   theme(text = element_text(size = 25))
 
 
+# Restricting critical values to their levels at alpha = 0.05
+# c3 = 3.84 and c4 = 5.99
+
+# Creating Marcum Q data to compare and find threshold
+ncpEqualData_alpha05 <- expand.grid(c3 = 3.84,
+                                    c4 = 5.99,
+                                    NCP = seq(0, 25, by = 0.1)) %>%
+  mutate(`Method 3: Single 1-DF Test` = 1 - pchisq(c3, ncp = NCP,
+                              df = 1, lower.tail = TRUE),
+         `Method 4: Disjunctive 2-DF Test` = 1 - pchisq(c4, df = 2,
+                              ncp = NCP, lower.tail = TRUE)) %>%
+  rowwise() %>%
+  pivot_longer(contains("Method"), names_to = "Design Method", values_to = "Power")
+
+# Figure 2
+ggplot(data = ncpEqualData_alpha05, #dplyr::filter(ncpEqualData, NCP == 5),
+       aes(x = NCP,
+           y = Power,
+           color = `Design Method`,
+           group = `Design Method`)) +
+  geom_line(linewidth = 1.5) +
+  xlab(TeX("Non-centrality parameter ($\\lambda$)")) +
+  theme(text = element_text(size = 20)) +
+  scale_color_manual(
+                     values = c("blue", "violet"))
+
+
+
 
 
 
@@ -70,6 +98,12 @@ View(dplyr::filter(ncpEqualData, c4 > c3))
 
 
 mosaic::favstats(c4_minus_c3 ~ MostPower, data = ncpEqualData)
+
+
+
+
+
+
 
 # Making sure using MarcumQ function is the same
 # ncpEqualData <- expand.grid(c3 = seq(0, 50, by = 1),

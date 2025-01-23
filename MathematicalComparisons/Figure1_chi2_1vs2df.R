@@ -1,6 +1,6 @@
-require(latex2exp)
+source("./RequiredPackages.R")
 
-# Figure 1. Critical values of central X^2 distribution with 1-DF and 2-DF
+# Figure 1. Critical values of central Chi^2 distribution with 1-DF and 2-DF
 
 critValueData34 <- data.frame(alpha = seq(from = 0.001, to = 0.999, by = 0.001)) %>%
   mutate(`c4` = qchisq(p = alpha, df = 1,
@@ -12,14 +12,18 @@ critValueData34Long <- critValueData34 %>%
   pivot_longer(cols = c(c4, c5),
                values_to = "Value", names_to = "Distribution")
 
-ggplot(data = critValueData34Long, aes(x = alpha, y = Value,
-                                       color = Distribution)) +
+figure1 <- ggplot(data = critValueData34Long, aes(x = alpha, y = Value,
+                                                  color = Distribution)) +
   scale_color_manual(labels = c(TeX("Central $\\chi^2$ with 1-DF"),
                                 TeX("Central $\\chi^2$ with 2-DF")),
                      values = c("violet", "blue")) +
   geom_line(linewidth = 1.5) +
   xlab(TeX("Overall False-Positive Rate ($\\alpha$)")) +
-  theme(text=element_text(size=25))
+  theme(text = element_text(size=25))
 
-View(TestData)
+# Saving figure 1 as png
+ggsave(filename = "./MathematicalComparisons/Output/Figure1.png",
+       plot = figure1,
+       width  = 5000, height = 3000, units  = "px")
+
 

@@ -1,5 +1,9 @@
 source("./RequiredPackages.R")
 
+# "Comparison 1"
+# "As is" comparison using the Chi^2 distribution and MVN distribution
+# Method 5 is two 1-sided tests, as is in the paper and package
+
 # Varying Rho1 -----------------------------------------------------------------
 # Table of all Parameters
 numParameters_Rho1 <- expand.grid(K = 8,

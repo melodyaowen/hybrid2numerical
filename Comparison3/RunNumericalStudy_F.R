@@ -69,13 +69,7 @@ powerTable <- numParameters %>%
                                           varY1 = varY1, varY2 = varY2,
                                           rho01 = rho01, rho02 = rho02,
                                           rho1 = rho1, rho2  = rho2,
-                                          r = r, dist = "T"),
-         'method5_MVN' = calc_pwr_conj_test(K = K, m = m, alpha = alpha,
-                                            beta1 = beta1, beta2 = beta2,
-                                            varY1 = varY1, varY2 = varY2,
-                                            rho01 = rho01, rho02 = rho02,
-                                            rho1 = rho1, rho2  = rho2,
-                                            r = r, dist = "MVN")) %>%
+                                          r = r, dist = "T")) %>%
   mutate_at(vars(contains('method')), funs(.*100))
 
 View(powerTable)
@@ -86,7 +80,7 @@ nrow(numParameters)
 scenarios100 <- powerTable %>%
   dplyr::filter(if_any(c(method1_bonf, method1_sidak, method1_dap,
                          method2, method3,
-                         method4_F, method5_T, method5_MVN), ~ . == 100))
+                         method4_F, method5_T), ~ . == 100))
 
 nrow(scenarios100)
 View(scenarios100)
@@ -105,18 +99,21 @@ unique(mutate(powerTable, method4biggerthan1 = ifelse(method4_F > method1_bonf, 
 unique(mutate(powerTable, method4biggerthan1 = ifelse(method4_F > method1_sidak, "Yes", "No"))$method4biggerthan1)
 unique(mutate(powerTable, method4biggerthan1 = ifelse(method4_F > method1_dap, "Yes", "No"))$method4biggerthan1)
 
+# Check for cases where methods 2, 3, and 4 are not better than method 5
+unique(mutate(powerTable, method2biggerthan5 = ifelse(method2 > method5_T, "Yes", "No"))$method2biggerthan5)
+unique(mutate(powerTable, method3biggerthan5 = ifelse(method3 > method5_T, "Yes", "No"))$method3biggerthan5)
+unique(mutate(powerTable, method4biggerthan5 = ifelse(method4_F > method5_T, "Yes", "No"))$method4biggerthan5)
+
 View(mutate(powerTable, method4biggerthan1 = ifelse(method4_F > method1_dap, "Yes", "No")))
 
 # Visualizations ---------------------------------------------------------------
 # Frequency of how many times a method is most powerful
 methodList <- c("method1_bonf", "method1_sidak", "method1_dap",
-                "method2", "method3", "method4_F",
-                "method5_T", "method5_MVN")
+                "method2", "method3", "method4_F", "method5_T")
 
 mostPowerful <- powerTable %>%
   pivot_longer(cols = c("method1_bonf", "method1_sidak", "method1_dap",
-                        "method2", "method3", "method4_F",
-                        "method5_T", "method5_MVN"), names_to = "Method",
+                        "method2", "method3", "method4_F", "method5_T"), names_to = "Method",
                values_to = "Power") %>%
   group_by(Scenario) %>%
   filter(Power == max(Power)) %>%
@@ -135,8 +132,7 @@ write.csv(mostPowerful, file = "./Results/F/MostPowerful.csv")
 # Frequency of how many times a method is least powerful
 leastPowerful <- powerTable %>%
   pivot_longer(cols = c("method1_bonf", "method1_sidak", "method1_dap",
-                        "method2", "method3", "method4_F",
-                        "method5_T", "method5_MVN"), names_to = "Method",
+                        "method2", "method3", "method4_F", "method5_T"), names_to = "Method",
                values_to = "Power") %>%
   group_by(Scenario) %>%
   filter(Power == min(Power)) %>%
@@ -155,8 +151,7 @@ write.csv(leastPowerful, file = "./Results/F/LeastPowerful.csv")
 # Histogram of power results for methods
 powerLong <- powerTable %>%
   pivot_longer(cols = c("method1_bonf", "method1_sidak", "method1_dap",
-                        "method2", "method3", "method4_F",
-                        "method5_T", "method5_MVN"), names_to = "Method",
+                        "method2", "method3", "method4_F", "method5_T"), names_to = "Method",
                values_to = "Power") %>%
   mutate("Method Label" = fct_recode(Method,
                                      "1. P-Value Adjustment (Bonferroni)" = "method1_bonf",
@@ -165,8 +160,7 @@ powerLong <- powerTable %>%
                                      "2. Combined Outcomes" = "method2",
                                      "3. Single 1-DF Test" = "method3",
                                      "4. Disjunctive 2-DF" = "method4_F",
-                                     "5. Conjunctive IU Test (t-Dist)" = "method5_T",
-                                     "5. Conjunctive IU Test (MVN-Dist)" = "method5_MVN"))
+                                     "5. Conjunctive IU Test (t-Dist)" = "method5_T"))
 
 summaryStats <- powerLong %>%
   dplyr::select(`Method Label`, Power) %>%
@@ -231,7 +225,6 @@ rank_summary_melted <- melt(rank_summary_table, id.vars = "Scenario") %>%
                          "method3" = "3. Single 1-DF Weighted",
                          "method2" = "2. Combined Outcomes",
                          "method4_F" = "4. Disj. 2-DF (F)",
-                         "method5_MVN" = "5. Conj. IU (MVN)",
                          "method5_T" = "5. Conj. IU (T)",
                          "method1_dap" = "1. P-Val Adj. (D/AP)",
                          "method1_sidak" = "1. P-Val Adj. (Sidak)",
@@ -245,7 +238,6 @@ mean_ranks <- rankData %>%
                          "method3" = "3. Single 1-DF Weighted",
                          "method2" = "2. Combined Outcomes",
                          "method4_F" = "4. Disj. 2-DF (F)",
-                         "method5_MVN" = "5. Conj. IU (MVN)",
                          "method5_T" = "5. Conj. IU (T)",
                          "method1_dap" = "1. P-Val Adj. (D/AP)",
                          "method1_sidak" = "1. P-Val Adj. (Sidak)",
@@ -265,7 +257,7 @@ heatmap_plot <- ggplot(rank_summary_melted, aes(x = Method, y = Scenario, fill =
         axis.text.x = element_text(angle = 25, hjust = 1),
         plot.margin = unit(c(1, 4, 1, 1), "lines")) +  # Adjust margins to make space for table
   annotation_custom(grob = table_grob,
-                    xmin = 7, xmax = 13.1, ymin = -400, ymax = 600)  # Adjust these values to place the table
+                    xmin = 5.6, xmax = 12.1, ymin = -400, ymax = 600)  # Adjust these values to place the table
 print(heatmap_plot)
 
 # Table of frequencies separated by rho1 and rho2
@@ -289,9 +281,9 @@ methods2345 <- powerTable %>%
   mutate(rho02minus01 = rho02 - rho01,
          var2minus1 = varY2 - varY1,
          beta2minus1 = beta2 - beta1,
-         mostPower = pmax(method2, method3, method4_F, method5_MVN)) %>%
-  mutate(best = pmap_chr(list(method2, method3, method4_F, method5_MVN), ~ {
-    values <- c(method2 = ..1, method3 = ..2, method4_F = ..3, method5_MVN = ..4)
+         mostPower = pmax(method2, method3, method4_F)) %>%
+  mutate(best = pmap_chr(list(method2, method3, method4_F), ~ {
+    values <- c(method2 = ..1, method3 = ..2, method4_F = ..3)
     tied_methods <- names(values)[values == max(values)]
     paste(tied_methods, collapse = " = ")
   })) %>%

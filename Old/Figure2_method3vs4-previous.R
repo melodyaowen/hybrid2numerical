@@ -99,6 +99,80 @@ MostPowerEqual <- mutate(ncpEqualData, `Highest Power` = ifelse(Method3 > Method
   summarize(n = n())
 MostPowerEqual
 
+
+# When do \lambda3 = \lambda4?
+
+equal34 <- expand.grid(beta1 = seq(0.5, 4, by = 0.5),
+                       beta2 = seq(0.5, 4, by = 0.5),
+                       varY1 = seq(0.5, 2, by = 0.1),
+                       varY2 = seq(0.5, 2, by = 0.1),
+                       K = c(8, 10),
+                       m = c(50, 100),
+                       rho01 = c(0.05, 0.1),
+                       rho02 = c(0.05, 0.1),
+                       rho1 = c(0.005, 0.01, 0.02, 0.05),
+                       rho2 = c(0.1, 0.3, 0.5, 0.7))
+
+tolerance <- 1e-8
+
+equal34calc <- equal34 %>%
+  mutate(VIF1 = 1 + (m-1)*rho01,
+         VIF2 = 1 + (m-1)*rho02,
+         VIF12 = rho2 + (m-1)*rho1,
+         sigma2beta1vif2 = sqrt(varY2)*beta1*sqrt(VIF2),
+         sigma1beta2vif1 = sqrt(varY1)*beta2*sqrt(VIF1),
+         equal = ifelse(abs(sigma2beta1vif2 - sigma1beta2vif1) < tolerance, TRUE, FALSE)) %>%
+  mutate(Z1.sq = (beta1^2)/(((2*varY1)/(K*m))*
+                                     (1 + (m - 1)*rho01)),
+         Z2.sq = (beta2^2)/(((2*varY2)/(K*m))*
+                                     (1 + (m - 1)*rho02)),
+         CorrZ1Z2 = (rho2 + (m - 1)*rho1)/
+           sqrt((1 + (m - 1)*rho01)*(1 + (m - 1)*rho02)),
+
+         method3_lambda = ((sqrt(Z1.sq) + sqrt(Z2.sq))^2)/(2*(1 + CorrZ1Z2))) %>%
+  mutate(method4_lambda = K*m*((beta1^2)*varY2*VIF2 +
+                                         (beta2^2)*varY1*VIF1 -
+                                         2*beta1*beta2*sqrt(varY1)*
+                                         sqrt(varY2)*VIF12)/(2*varY1*varY2*(VIF1*VIF2-VIF12^2))) %>%
+  mutate(lambdasEqual = ifelse(abs(method3_lambda - method4_lambda) < tolerance, TRUE, FALSE))
+
+View(head(equal34calc, 50))
+
+table(equal34calc$equal, equal34calc$lambdasEqual)
+
+
+equal34filtered <- equal34calc %>%
+  dplyr::filter(lambdasEqual == TRUE)
+
+# Z1.sq <- (beta1_input^2)/(((2*varY1_input)/(K_input*m_input))*
+#                             (1 + (m_input - 1)*rho01_input)) # Z1^2
+# Z2.sq <- (beta2_input^2)/(((2*varY2_input)/(K_input*m_input))*
+#                             (1 + (m_input - 1)*rho02_input)) # Z2^2
+#
+# CorrZ1Z2 <- (rho2_input + (m_input - 1)*rho1_input)/
+#   sqrt((1 + (m_input - 1)*rho01_input)*(1 + (m_input - 1)*rho02_input))
+#
+# method3_lambda <- ((sqrt(Z1.sq) + sqrt(Z2.sq))^2)/(2*(1 + CorrZ1Z2))
+
+
+# Method 4
+
+
+# Calculate VIFs
+VIF1 <- 1 + (m_input - 1)*rho01_input
+VIF2 <- 1 + (m_input - 1)*rho02_input
+VIF12 <- rho2_input + (m_input - 1)*rho1_input
+
+# Power for Method 4 Chi2
+method4_lambda <- K_input*m_input*((beta1_input^2)*varY2_input*VIF2 +
+                                     (beta2_input^2)*varY1_input*VIF1 -
+                                     2*beta1_input*beta2_input*sqrt(varY1_input)*
+                                     sqrt(varY2_input)*VIF12)/(2*varY1_input*
+                                                                 varY2_input*(VIF1*VIF2-VIF12^2))
+
+
+
+
 # Case when the NCP's are unequal for Method 3 and 4
 
 # ncpUnequalData <- expand.grid(alpha = c(0.01, 0.025, 0.05, 0.1),

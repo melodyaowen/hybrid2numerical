@@ -64,12 +64,6 @@ powerTable <- numParameters %>%
                                                 rho01 = rho01, rho02 = rho02,
                                                 rho1 = rho1, rho2  = rho2,
                                                 r = r, dist = "Chi2"),
-         'method5_T' = calc_pwr_conj_test(K = K, m = m, alpha = alpha,
-                                          beta1 = beta1, beta2 = beta2,
-                                          varY1 = varY1, varY2 = varY2,
-                                          rho01 = rho01, rho02 = rho02,
-                                          rho1 = rho1, rho2  = rho2,
-                                          r = r, dist = "T"),
          'method5_MVN' = calc_pwr_conj_test(K = K, m = m, alpha = alpha,
                                             beta1 = beta1, beta2 = beta2,
                                             varY1 = varY1, varY2 = varY2,
@@ -86,7 +80,7 @@ nrow(numParameters)
 scenarios100 <- powerTable %>%
   dplyr::filter(if_any(c(method1_bonf, method1_sidak, method1_dap,
                          method2, method3,
-                         method4_Chi2, method5_T, method5_MVN), ~ . == 100))
+                         method4_Chi2, method5_MVN), ~ . == 100))
 
 nrow(scenarios100)
 View(scenarios100)
@@ -105,11 +99,15 @@ unique(mutate(powerTable, method4biggerthan1 = ifelse(method4_Chi2 > method1_bon
 unique(mutate(powerTable, method4biggerthan1 = ifelse(method4_Chi2 > method1_sidak, "Yes", "No"))$method4biggerthan1)
 unique(mutate(powerTable, method4biggerthan1 = ifelse(method4_Chi2 > method1_dap, "Yes", "No"))$method4biggerthan1)
 
+# Check for cases where methods 2, 3, and 4 are not better than method 5
+unique(mutate(powerTable, method2biggerthan5 = ifelse(method2 > method5_MVN, "Yes", "No"))$method2biggerthan5)
+unique(mutate(powerTable, method3biggerthan5 = ifelse(method3 > method5_MVN, "Yes", "No"))$method3biggerthan5)
+unique(mutate(powerTable, method4biggerthan5 = ifelse(method4_Chi2 > method5_MVN, "Yes", "No"))$method4biggerthan5)
+
 # Visualizations ---------------------------------------------------------------
 # Frequency of how many times a method is most powerful
 methodList <- c("method1_bonf", "method1_sidak", "method1_dap",
-                "method2", "method3", "method4_Chi2",
-                "method5_T", "method5_MVN")
+                "method2", "method3", "method4_Chi2", "method5_MVN")
 # mostPowerful <- powerTable %>%
 #   pivot_longer(cols = c("method1_bonf", "method1_sidak", "method1_dap",
 #                         "method2", "method3", "method4_Chi2",
@@ -136,8 +134,8 @@ methodList <- c("method1_bonf", "method1_sidak", "method1_dap",
 
 mostPowerful <- powerTable %>%
   pivot_longer(cols = c("method1_bonf", "method1_sidak", "method1_dap",
-                        "method2", "method3", "method4_Chi2",
-                        "method5_T", "method5_MVN"), names_to = "Method",
+                        "method2", "method3", "method4_Chi2", "method5_MVN"),
+               names_to = "Method",
                values_to = "Power") %>%
   group_by(Scenario) %>%
   filter(Power == max(Power)) %>%
@@ -157,8 +155,8 @@ View(mostPowerful)
 # Frequency of how many times a method is least powerful
 leastPowerful <- powerTable %>%
   pivot_longer(cols = c("method1_bonf", "method1_sidak", "method1_dap",
-                        "method2", "method3", "method4_Chi2",
-                        "method5_T", "method5_MVN"), names_to = "Method",
+                        "method2", "method3", "method4_Chi2", "method5_MVN"),
+               names_to = "Method",
                values_to = "Power") %>%
   group_by(Scenario) %>%
   filter(Power == min(Power)) %>%
@@ -177,8 +175,8 @@ write.csv(leastPowerful, file = "./Results/Chi2/LeastPowerful.csv")
 # Histogram of power results for methods
 powerLong <- powerTable %>%
   pivot_longer(cols = c("method1_bonf", "method1_sidak", "method1_dap",
-                        "method2", "method3", "method4_Chi2",
-                        "method5_T", "method5_MVN"), names_to = "Method",
+                        "method2", "method3", "method4_Chi2", "method5_MVN"),
+               names_to = "Method",
                values_to = "Power") %>%
   mutate("Method Label" = fct_recode(Method,
                                      "1. P-Value Adjustment (Bonferroni)" = "method1_bonf",
@@ -187,7 +185,6 @@ powerLong <- powerTable %>%
                                      "2. Combined Outcomes" = "method2",
                                      "3. Single 1-DF Test" = "method3",
                                      "4. Disjunctive 2-DF" = "method4_Chi2",
-                                     "5. Conjunctive IU Test (t-Dist)" = "method5_T",
                                      "5. Conjunctive IU Test (MVN-Dist)" = "method5_MVN"))
 
 summaryStats <- powerLong %>%
@@ -247,7 +244,6 @@ rank_summary_melted <- melt(rank_summary_table, id.vars = "Scenario") %>%
                          "method2" = "2. Combined Outcomes",
                          "method4_Chi2" = "4. Disj. 2-DF (Chi2)",
                          "method5_MVN" = "5. Conj. IU (MVN)",
-                         "method5_T" = "5. Conj. IU (T)",
                          "method1_dap" = "1. P-Val Adj. (D/AP)",
                          "method1_sidak" = "1. P-Val Adj. (Sidak)",
                          "method1_bonf" = "1. P-Val Adj. (Bonf.)"))
@@ -261,7 +257,6 @@ mean_ranks <- rankData %>%
                          "method2" = "2. Combined Outcomes",
                          "method4_Chi2" = "4. Disj. 2-DF (Chi2)",
                          "method5_MVN" = "5. Conj. IU (MVN)",
-                         "method5_T" = "5. Conj. IU (T)",
                          "method1_dap" = "1. P-Val Adj. (D/AP)",
                          "method1_sidak" = "1. P-Val Adj. (Sidak)",
                          "method1_bonf" = "1. P-Val Adj. (Bonf.)"))
@@ -280,7 +275,7 @@ heatmap_plot <- ggplot(rank_summary_melted, aes(x = Method, y = Scenario, fill =
         axis.text.x = element_text(angle = 25, hjust = 1),
         plot.margin = unit(c(1, 4, 1, 1), "lines")) +  # Adjust margins to make space for table
   annotation_custom(grob = table_grob,
-                    xmin = 7, xmax = 13.1, ymin = -400, ymax = 600)  # Adjust these values to place the table
+                    xmin = 5.3, xmax = 12.4, ymin = -400, ymax = 600)  # Adjust these values to place the table
 print(heatmap_plot)
 
 
@@ -301,7 +296,6 @@ diffData <- powerTable %>%
                          "method2" = "2. Combined Outcomes",
                          "method4_Chi2" = "4. Disj. 2-DF (Chi2)",
                          "method5_MVN" = "5. Conj. IU (MVN)",
-                         "method5_T" = "5. Conj. IU (T)",
                          "method1_dap" = "1. P-Val Adj. (D/AP)",
                          "method1_sidak" = "1. P-Val Adj. (Sidak)",
                          "method1_bonf" = "1. P-Val Adj. (Bonf.)")) %>%
@@ -342,7 +336,6 @@ sizeData <- powerTable %>%
                          "method2" = "2. Combined Outcomes",
                          "method4_Chi2" = "4. Disj. 2-DF (Chi2)",
                          "method5_MVN" = "5. Conj. IU (MVN)",
-                         "method5_T" = "5. Conj. IU (T)",
                          "method1_dap" = "1. P-Val Adj. (D/AP)",
                          "method1_sidak" = "1. P-Val Adj. (Sidak)",
                          "method1_bonf" = "1. P-Val Adj. (Bonf.)"))
@@ -364,7 +357,6 @@ rhoData <- powerTable %>%
                          "method2" = "2. Combined Outcomes",
                          "method4_Chi2" = "4. Disj. 2-DF (Chi2)",
                          "method5_MVN" = "5. Conj. IU (MVN)",
-                         "method5_T" = "5. Conj. IU (T)",
                          "method1_dap" = "1. P-Val Adj. (D/AP)",
                          "method1_sidak" = "1. P-Val Adj. (Sidak)",
                          "method1_bonf" = "1. P-Val Adj. (Bonf.)"))
@@ -378,8 +370,7 @@ ggplot(rhoData, aes(x = Power, y = reorder(Method, Power, FUN = mean),
 # Most Powerful Methods --------------------------------------------------------
 
 methods234 <- powerTable %>%
-  dplyr::select(-method1_bonf, -method1_sidak, -method1_dap,
-                -method5_T, -method5_MVN) %>%
+  dplyr::select(-method1_bonf, -method1_sidak, -method1_dap, -method5_MVN) %>%
   mutate(rho02minus01 = rho02 - rho01,
          var2minus1 = varY2 - varY1,
          beta2minus1 = beta2 - beta1,
@@ -465,3 +456,97 @@ View(allBestCases)
 
 #write.csv(allBestRaw, file = "./Results/Chi2/BestAll_Raw.csv")
 #write.csv(allBestCases, file = "./Results/Chi2/BestAll_Cases.csv")
+
+
+# Result table based on standardized effect sizes ------------------------------
+
+methods234_std <- powerTable %>%
+  dplyr::select(-method1_bonf, -method1_sidak, -method1_dap, -method5_MVN) %>%
+  mutate(effect1std = round(beta1/sqrt(varY1), 2),
+         effect2std = round(beta2/sqrt(varY2), 2),
+         rho02minus01 = rho02 - rho01,
+         mostPower = pmax(method2, method3, method4_Chi2)) %>%
+  mutate(best = pmap_chr(list(method2, method3, method4_Chi2), ~ {
+    values <- c(method2 = ..1, method3 = ..2, method4_Chi2 = ..3)
+    tied_methods <- names(values)[values == max(values)]
+    paste(tied_methods, collapse = " = ")
+  })) %>%
+  ungroup() %>%
+  arrange(effect1std, effect2std, rho02minus01) %>%
+  mutate(newID = paste(effect1std, effect2std, rho02minus01)) %>%
+  group_by(newID) %>%
+  mutate(group_id = cur_group_id()) %>%
+  ungroup()
+
+# Getting counts for groups
+scenarioGroups <- methods234_std %>%
+  dplyr::select(Scenario, group_id) %>%
+  group_by(group_id) %>%
+  summarize(n = n())
+
+#numCases <- if(all(scenarioGroups$n == 96)) {96} else {NA}
+
+mosaic::tally(best ~ group_id, data = methods234_std)
+
+bestSummary_std <- methods234_std %>%
+  dplyr::select(beta1, beta2, varY1, varY2, rho01, rho02, best,
+                best, newID, group_id, effect1std, effect2std, rho02minus01) %>%
+  group_by(best, group_id,
+           beta1, beta2, varY1, varY2, rho01, rho02
+  ) %>%
+  mutate(n = n()) %>%
+  distinct() %>%
+  spread(best, n) %>%
+  mutate(across(contains("method"), ~ replace_na(.x, 0))) %>%
+  arrange(group_id)
+
+View(bestSummary_std)
+
+allBest_std <- bestSummary_std %>%
+  mutate(eff2minus1 = effect2std - effect1std,
+         rho02minus01 = rho02 - rho01) %>%
+  mutate(eff1eff2 = paste0("(", effect1std, ", ", effect2std, ")"),
+         rho01rho02 = paste0("(", rho01, ", ", rho02, ")")) %>%
+  ungroup() %>%
+  mutate(EffectCase = ifelse(effect1std < effect2std, paste0("beta1/sigma1 < beta2/sigma2"),
+                           ifelse(effect1std > effect2std, paste0("beta1/sigma1 > beta2/sigma2"),
+                                  ifelse(effect1std == effect2std, paste0("beta1/sigma1 = beta2/sigma2"), NA))),
+         RhoCase = ifelse(rho01 < rho02, paste0("rho01 < rho02"),
+                          ifelse(rho01 > rho02, paste0("rho01 > rho02"),
+                                 ifelse(rho01 == rho02, paste0("rho01 = rho02"), NA)))) %>%
+  dplyr::select(group_id, eff1eff2, eff2minus1,
+                rho01rho02, rho02minus01,
+                contains("="), contains("method"),
+                EffectCase, RhoCase)
+
+allBestRaw_std <- allBest_std %>%
+  dplyr::select(-EffectCase, -RhoCase) %>%
+  arrange(eff2minus1, rho02minus01) %>%
+  mutate(across(contains("method"), ~ paste0(round(.x/numCases*100, 2),
+                                             "%", " (n = ", .x, ")"))) %>%
+  mutate(n = numCases)
+
+allBestCases_std <- allBest_std %>%
+  dplyr::select(EffectCase, RhoCase, starts_with("method")) %>%
+  mutate(n = numCases) %>%
+  group_by(EffectCase, RhoCase) %>%
+  summarise_all(sum) %>%
+  mutate(across(contains("method"), ~ paste0(round(.x/n*100, 2),
+                                             "%", " (n = ", .x, ")")))
+write.csv(allBestRaw_std, file = "./Results/Chi2/BestAll_Raw_STD.csv")
+write.csv(allBestCases_std, file = "./Results/Chi2/BestAll_Cases_STD.csv")
+
+# Analyzing methods 4 and 5 specifically ---------------------------------------
+# View
+View(mutate(powerTable, method4biggerthan5 = ifelse(method4_Chi2 > method5_MVN, "Yes", "No")))
+power5better4 <- powerTable %>%
+  dplyr::filter(method4_Chi2 < method5_MVN) %>% # analyze later
+  dplyr::select(-alpha, -r, -method1_bonf, -method1_sidak, -method1_dap, -method2, -method3) %>%
+  mutate(difference = method5_MVN - method4_Chi2) %>%
+  pivot_longer(c(K, m, beta1, beta2, varY1, varY2, rho01, rho02, rho1, rho2),
+               names_to = "Parameter", values_to = "Value")
+
+ggplot(aes(x = Value, y = difference), data = power5better4) + geom_point() +
+  facet_wrap(~Parameter, scales = "free")
+
+
