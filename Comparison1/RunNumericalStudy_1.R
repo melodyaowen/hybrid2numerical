@@ -256,22 +256,43 @@ ggsave(filename = "./Comparison1/Results1/RankHeatmap_1.png",
 
 # Most Powerful Method Tables --------------------------------------------------
 
-# Need to start by grabbing the names of all methods that have at least
+# Start by grabbing the names of all methods that have at least
 # one scenario of being the most powerful among all the methods
+mostPowerfulMethodNames <- powerTable %>%
+  pivot_longer(cols = c("method1_bonf", "method1_sidak", "method1_dap",
+                        "method2", "method3", "method4_Chi2", "method5_MVN"),
+               names_to = "Method",
+               values_to = "Power") %>%
+  group_by(Scenario) %>%
+  filter(Power == max(Power)) %>%
+  ungroup() %>%
+  dplyr::select(Method) %>%
+  distinct(Method)
 
+# Vector of most powerful method names
+mostPowerfulNames <- mostPowerfulMethodNames$Method
 
-methods234 <- powerTable %>%
-  dplyr::select(-method1_bonf, -method1_sidak, -method1_dap, -method5_MVN) %>%
+# Full power table with just most powerful methods
+mostPowerfulFull <- powerTable %>%
+  dplyr::select(Scenario, K, m, beta1, beta2, varY1, varY2, rho01, rho02,
+                rho1, rho2, alpha, r, all_of(mostPowerfulNames)) %>%
+  rowwise() %>%
   mutate(rho02minus01 = rho02 - rho01,
          var2minus1 = varY2 - varY1,
          beta2minus1 = beta2 - beta1,
-         mostPower = pmax(method2, method3, method4_Chi2)) %>%
-  mutate(best = pmap_chr(list(method2, method3, method4_Chi2), ~ {
-    values <- c(method2 = ..1, method3 = ..2, method4_Chi2 = ..3)
-    tied_methods <- names(values)[values == max(values)]
-    paste(tied_methods, collapse = " = ")
-  })) %>%
+         mostPower = max(c_across(all_of(mostPowerfulNames)))) %>%
   ungroup() %>%
+  mutate(
+    best = pmap_chr(
+      dplyr::select(cur_data(), starts_with("method")),
+      ~ {
+        rowvals <- c(...)
+        names(rowvals) <- names(dplyr::select(cur_data(), starts_with("method")))
+        tied_methods <- names(rowvals)[rowvals == max(rowvals)]
+        paste(tied_methods, collapse = ", ")
+      }
+    )
+  ) %>%
   arrange(beta2minus1, var2minus1, rho02minus01) %>%
   mutate(newID = paste(rho02minus01, var2minus1, beta2minus1)) %>%
   group_by(newID) %>%
@@ -279,17 +300,17 @@ methods234 <- powerTable %>%
   ungroup()
 
 # Getting counts for groups
-scenarioGroups <- methods234 %>%
+scenarioGroups <- mostPowerfulFull %>%
   dplyr::select(Scenario, group_id) %>%
   group_by(group_id) %>%
   summarize(n = n())
 
-numCases <- if(all(scenarioGroups$n == 96)) {96} else {NA}
+# Summary of methods and how many scenarios they're most powerful for
+mosaic::tally(best ~ group_id, data = mostPowerfulFull)
 
-mosaic::tally(best ~ group_id, data = methods234)
-
-bestSummary <- methods234 %>%
-  dplyr::select(beta1, beta2, varY1, varY2, rho01, rho02, best,
+# Summary data
+bestSummary <- mostPowerfulFull %>%
+  dplyr::select(beta1, beta2, varY1, varY2, rho01, rho02,
                 best, newID, group_id) %>%
   group_by(best, group_id,
            beta1, beta2, varY1, varY2, rho01, rho02
@@ -300,7 +321,7 @@ bestSummary <- methods234 %>%
   mutate(across(contains("method"), ~ replace_na(.x, 0))) %>%
   arrange(group_id)
 
-View(bestSummary)
+#View(bestSummary)
 
 allBest <- bestSummary %>%
   mutate(beta2minus1 = beta2 - beta1,
@@ -328,41 +349,52 @@ allBest <- bestSummary %>%
 allBestRaw <- allBest %>%
   dplyr::select(-BetaCase, -VarCase, -RhoCase) %>%
   arrange(beta2minus1, var2minus1, rho02minus01) %>%
-  mutate(across(contains("method"), ~ paste0(round(.x/numCases*100, 2),
-                                             "%", " (n = ", .x, ")"))) %>%
-  mutate(n = numCases)
+  left_join(., scenarioGroups, by = "group_id") %>%
+  rowwise() %>%
+  mutate(across(contains("method"),
+                ~ if_else(.x == 0, "0%",  # the special case: just "0%"
+                          paste0(round(.x/n*100, 2), "% (n = ", .x, ")"))))
 
 allBestCases <- allBest %>%
-  dplyr::select(BetaCase, VarCase, RhoCase, starts_with("method")) %>%
-  mutate(n = numCases) %>%
+  dplyr::select(group_id, BetaCase, VarCase, RhoCase, starts_with("method")) %>%
+  left_join(., scenarioGroups, by = "group_id") %>%
+  dplyr::select(-group_id) %>%
   group_by(BetaCase, VarCase, RhoCase) %>%
   summarise_all(sum) %>%
-  mutate(across(contains("method"), ~ paste0(round(.x/n*100, 2),
-                                             "%", " (n = ", .x, ")")))
+  rowwise() %>%
+  mutate(across(contains("method"),
+                ~ if_else(.x == 0, "0%",  # the special case: just "0%"
+                          paste0(round(.x/n*100, 2), "% (n = ", .x, ")"))))
 
-View(allBest)
+#View(allBest)
+#View(allBestRaw)
+#View(allBestCases)
 
-View(allBestRaw)
-View(allBestCases)
-
-write.csv(allBestRaw, file = "./Results/Chi2/BestAll_Raw.csv")
-write.csv(allBestCases, file = "./Results/Chi2/BestAll_Cases.csv")
-
+write.csv(allBestRaw, file = "./Comparison1/Results1/BestAll_1.csv")
+write.csv(allBestCases, file = "./Comparison1/Results1/BestAllCases_1.csv")
 
 # Result table based on standardized effect sizes ------------------------------
 
-methods234_std <- powerTable %>%
-  dplyr::select(-method1_bonf, -method1_sidak, -method1_dap, -method5_MVN) %>%
+mostPowerfulFull_std <- powerTable %>%
+  dplyr::select(Scenario, K, m, beta1, beta2, varY1, varY2, rho01, rho02,
+                rho1, rho2, alpha, r, all_of(mostPowerfulNames)) %>%
+  rowwise() %>%
   mutate(effect1std = round(beta1/sqrt(varY1), 2),
          effect2std = round(beta2/sqrt(varY2), 2),
          rho02minus01 = rho02 - rho01,
-         mostPower = pmax(method2, method3, method4_Chi2)) %>%
-  mutate(best = pmap_chr(list(method2, method3, method4_Chi2), ~ {
-    values <- c(method2 = ..1, method3 = ..2, method4_Chi2 = ..3)
-    tied_methods <- names(values)[values == max(values)]
-    paste(tied_methods, collapse = " = ")
-  })) %>%
+         mostPower = max(c_across(all_of(mostPowerfulNames)))) %>%
   ungroup() %>%
+  mutate(
+    best = pmap_chr(
+      dplyr::select(cur_data(), starts_with("method")),
+      ~ {
+        rowvals <- c(...)
+        names(rowvals) <- names(dplyr::select(cur_data(), starts_with("method")))
+        tied_methods <- names(rowvals)[rowvals == max(rowvals)]
+        paste(tied_methods, collapse = ", ")
+      }
+    )
+  ) %>%
   arrange(effect1std, effect2std, rho02minus01) %>%
   mutate(newID = paste(effect1std, effect2std, rho02minus01)) %>%
   group_by(newID) %>%
@@ -370,18 +402,18 @@ methods234_std <- powerTable %>%
   ungroup()
 
 # Getting counts for groups
-scenarioGroups <- methods234_std %>%
+scenarioGroups_std <- mostPowerfulFull_std %>%
   dplyr::select(Scenario, group_id) %>%
   group_by(group_id) %>%
   summarize(n = n())
 
-#numCases <- if(all(scenarioGroups$n == 96)) {96} else {NA}
+# Summary of methods of how many scenarios they're most powerful for
+mosaic::tally(best ~ group_id, data = mostPowerfulFull_std)
 
-mosaic::tally(best ~ group_id, data = methods234_std)
-
-bestSummary_std <- methods234_std %>%
-  dplyr::select(beta1, beta2, varY1, varY2, rho01, rho02, best,
-                best, newID, group_id, effect1std, effect2std, rho02minus01) %>%
+bestSummary_std <- mostPowerfulFull_std %>%
+  dplyr::select(beta1, beta2, varY1, varY2, rho01, rho02,
+                best, newID, group_id,
+                effect1std, effect2std, rho02minus01) %>%
   group_by(best, group_id,
            beta1, beta2, varY1, varY2, rho01, rho02
   ) %>%
@@ -391,7 +423,7 @@ bestSummary_std <- methods234_std %>%
   mutate(across(contains("method"), ~ replace_na(.x, 0))) %>%
   arrange(group_id)
 
-View(bestSummary_std)
+#View(bestSummary_std)
 
 allBest_std <- bestSummary_std %>%
   mutate(eff2minus1 = effect2std - effect1std,
@@ -413,31 +445,37 @@ allBest_std <- bestSummary_std %>%
 allBestRaw_std <- allBest_std %>%
   dplyr::select(-EffectCase, -RhoCase) %>%
   arrange(eff2minus1, rho02minus01) %>%
-  mutate(across(contains("method"), ~ paste0(round(.x/numCases*100, 2),
-                                             "%", " (n = ", .x, ")"))) %>%
-  mutate(n = numCases)
+  left_join(., scenarioGroups_std, by = "group_id") %>%
+  mutate(across(contains("method"),
+                ~ if_else(.x == 0, "0%",  # the special case: just "0%"
+                          paste0(round(.x/n*100, 2), "% (n = ", .x, ")"))))
 
 allBestCases_std <- allBest_std %>%
-  dplyr::select(EffectCase, RhoCase, starts_with("method")) %>%
-  mutate(n = numCases) %>%
+  dplyr::select(group_id, EffectCase, RhoCase, starts_with("method")) %>%
+  left_join(., scenarioGroups_std, by = "group_id") %>%
+  dplyr::select(-group_id) %>%
   group_by(EffectCase, RhoCase) %>%
   summarise_all(sum) %>%
-  mutate(across(contains("method"), ~ paste0(round(.x/n*100, 2),
-                                             "%", " (n = ", .x, ")")))
-write.csv(allBestRaw_std, file = "./Results/Chi2/BestAll_Raw_STD.csv")
-write.csv(allBestCases_std, file = "./Results/Chi2/BestAll_Cases_STD.csv")
+  rowwise() %>%
+  mutate(across(contains("method"),
+                ~ if_else(.x == 0, "0%",  # the special case: just "0%"
+                          paste0(round(.x/n*100, 2), "% (n = ", .x, ")"))))
+
+
+write.csv(allBestRaw_std, file = "./Comparison1/Results1/BestAll_1_STD.csv")
+write.csv(allBestCases_std, file = "./Comparison1/Results1/BestAllCases_1_STD.csv")
 
 # Analyzing methods 4 and 5 specifically ---------------------------------------
 
-View(mutate(powerTable, method4biggerthan5 = ifelse(method4_Chi2 > method5_MVN, "Yes", "No")))
-power5better4 <- powerTable %>%
-  dplyr::filter(method4_Chi2 < method5_MVN) %>% # analyze later
-  dplyr::select(-alpha, -r, -method1_bonf, -method1_sidak, -method1_dap, -method2, -method3) %>%
-  mutate(difference = method5_MVN - method4_Chi2) %>%
-  pivot_longer(c(K, m, beta1, beta2, varY1, varY2, rho01, rho02, rho1, rho2),
-               names_to = "Parameter", values_to = "Value")
-
-ggplot(aes(x = Value, y = difference), data = power5better4) + geom_point() +
-  facet_wrap(~Parameter, scales = "free")
+# View(mutate(powerTable, method4biggerthan5 = ifelse(method4_Chi2 > method5_MVN, "Yes", "No")))
+# power5better4 <- powerTable %>%
+#   dplyr::filter(method4_Chi2 < method5_MVN) %>% # analyze later
+#   dplyr::select(-alpha, -r, -method1_bonf, -method1_sidak, -method1_dap, -method2, -method3) %>%
+#   mutate(difference = method5_MVN - method4_Chi2) %>%
+#   pivot_longer(c(K, m, beta1, beta2, varY1, varY2, rho01, rho02, rho1, rho2),
+#                names_to = "Parameter", values_to = "Value")
+#
+# ggplot(aes(x = Value, y = difference), data = power5better4) + geom_point() +
+#   facet_wrap(~Parameter, scales = "free")
 
 
