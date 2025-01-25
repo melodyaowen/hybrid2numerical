@@ -133,25 +133,30 @@ calc_pwr_conj_test_2sided <- function(K,            # Number of clusters in trea
                            mean = 0,
                            sd = 1) # lower.tail = TRUE is default
 
-    # 1. Probability both outcomes > +criticalValue
+    # We want (|Z1| > z_{\alpha/2}) AND (|Z2| > z_{\alpha/2})
+
+    # Pr(reject) = Pr((Z1, Z2) in Region1 u Region2 u Region3 u Region 4)
+    #            = \sum_{i=1^4} Pr((Z_1, Z_2) in Region_i)
+
+    # Region 1. Probability both outcomes > +criticalValue
     p_upper_upper <- pmvnorm(lower = c(criticalValue, criticalValue),
                              upper = c(Inf, Inf),
                              mean = meanVector,
                              corr = wCor)[1]
 
-    # 2. Probability outcome1 > +criticalValue and outcome2 < -criticalValue
+    # Region 2. Probability outcome1 > +criticalValue and outcome2 < -criticalValue
     p_upper_lower <- pmvnorm(lower = c(criticalValue, -Inf),
                              upper = c(Inf, -criticalValue),
                              mean = meanVector,
                              corr = wCor)[1]
 
-    # 3. Probability outcome1 < -criticalValue and outcome2 > +criticalValue
+    # Region 3. Probability outcome1 < -criticalValue and outcome2 > +criticalValue
     p_lower_upper <- pmvnorm(lower = c(-Inf, criticalValue),
                              upper = c(-criticalValue, Inf),
                              mean = meanVector,
                              corr = wCor)[1]
 
-    # 4. Probability both outcomes < -criticalValue
+    # Region 4. Probability both outcomes < -criticalValue
     p_lower_lower <- pmvnorm(lower = c(-Inf, -Inf),
                              upper = c(-criticalValue, -criticalValue),
                              mean = meanVector,
@@ -167,24 +172,3 @@ calc_pwr_conj_test_2sided <- function(K,            # Number of clusters in trea
   }
   return(round(power, 4))
 } # End calc_pwr_conj_test_2sided()
-
-
-
-
-
-calc_pwr_conj_test_2sided(K = 10,            # Number of clusters in treatment arm
-                                      m = 500,            # Individuals per cluster
-                                      alpha = 0.05, # Significance level
-                                      beta1 = 0.1,        # Effect for outcome 1
-                                      beta2 = 0.1,        # Effect for outcome 2
-                                      varY1 = 0.23,        # Variance for outcome 1
-                                      varY2 = 0.25,        # Variance for outcome 2
-                                      rho01 = 0.025,        # ICC for outcome 1
-                                      rho02 = 0.025,        # ICC for outcome 2
-                                      rho1 = 0.01,         # Inter-subject between-endpoint ICC
-                                      rho2 = 0.05,         # Intra-subject between-endpoint ICC
-                                      r = 1,        # Treatment allocation ratio
-                                      cv = 0,       # If equal cluster size, cv=0
-                                      deltas = c(0,0),
-                                      dist = "MVN"   # Distribution to be used,
-)

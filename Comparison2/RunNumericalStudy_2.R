@@ -1,10 +1,8 @@
 source("./RequiredPackages.R")
-source("./Comparison2/Method5_2sided.R")
 
-# "Comparison 2"
-# "2-sided" comparison using the Chi^2 distribution and MVN distribution
-# Method 5 is two 2-sided tests, we use a new function defined for this purpose
-# and not the package function
+# "Comparison 1"
+# "As is" comparison using the Chi^2 distribution and MVN distribution
+# Method 5 is two 1-sided tests, as is in the paper and package
 
 # Table of all Parameters ------------------------------------------------------
 numParameters <- expand.grid(K = c(4, 6, 8, 10),
@@ -75,12 +73,12 @@ powerTable <- numParameters %>%
                                                 rho01 = rho01, rho02 = rho02,
                                                 rho1 = rho1, rho2  = rho2,
                                                 r = r, dist = "Chi2"),
-         'method5_MVN' = calc_pwr_conj_test_2sided(K = K, m = m, alpha = alpha,
-                                                   beta1 = beta1, beta2 = beta2,
-                                                   varY1 = varY1, varY2 = varY2,
-                                                   rho01 = rho01, rho02 = rho02,
-                                                   rho1 = rho1, rho2  = rho2,
-                                                   r = r, dist = "MVN")) %>%
+         'method5_MVN' = calc_pwr_conj_test(K = K, m = m, alpha = alpha,
+                                            beta1 = beta1, beta2 = beta2,
+                                            varY1 = varY1, varY2 = varY2,
+                                            rho01 = rho01, rho02 = rho02,
+                                            rho1 = rho1, rho2  = rho2,
+                                            r = r, dist = "MVN")) %>%
   mutate_at(vars(contains('method')), funs(.*100))
 
 View(head(powerTable))
@@ -119,7 +117,7 @@ mostPowerful <- powerTable %>%
 
 View(mostPowerful)
 
-write.csv(mostPowerful, file = "./Comparison2/Results2/MostPowerful_2.csv")
+write.csv(mostPowerful, file = "./Comparison1/Results1/MostPowerful_1.csv")
 
 # Frequency of how many times a method is least powerful
 leastPowerful <- powerTable %>%
@@ -139,7 +137,7 @@ leastPowerful <- powerTable %>%
   mutate(Percent = paste0(round((n/nrow(numParameters))*100, 2), "%"))
 
 View(leastPowerful)
-write.csv(leastPowerful, file = "./Comparison2/Results2/LeastPowerful_2.csv")
+write.csv(leastPowerful, file = "./Comparison1/Results1/LeastPowerful_1.csv")
 
 # Power Histogram --------------------------------------------------------------
 
@@ -167,7 +165,7 @@ summaryStats <- powerLong %>%
             Min = round(min(Power), 2),
             Max = round(max(Power), 2))
 
-powerHistogram2 <- ggplot(data = powerLong, aes(Power)) +
+powerHistogram1 <- ggplot(data = powerLong, aes(Power)) +
   geom_histogram(bins = 30, fill = 'blue') +
   facet_wrap(~`Method Label`) +
   ylab("Count") +
@@ -183,8 +181,8 @@ powerHistogram2 <- ggplot(data = powerLong, aes(Power)) +
             size = 4) +
   theme(text = element_text(size = 20))
 
-ggsave(filename = "./Comparison2/Results2/PowerHistogram_2.png",
-       plot = powerHistogram2,
+ggsave(filename = "./Comparison1/Results1/PowerHistogram_1.png",
+       plot = powerHistogram1,
        width  = 5000, height = 3000, units  = "px")
 
 # Ranking Heatmap --------------------------------------------------------------
@@ -239,7 +237,7 @@ mean_ranks <- rankData %>%
 table_grob <- tableGrob(mean_ranks)
 
 # Plot with heatmap
-rankHeatmap2 <- ggplot(rank_summary_melted, aes(x = Method, y = Scenario, fill = value)) +
+rankHeatmap1 <- ggplot(rank_summary_melted, aes(x = Method, y = Scenario, fill = value)) +
   geom_tile() +
   scale_fill_gradient(low = "white", high = "blue", name = "Rank of Power\n(Smaller number means more powerful)") +
   scale_y_continuous(breaks = seq(0, 30000, by = 5000)) +
@@ -252,8 +250,8 @@ rankHeatmap2 <- ggplot(rank_summary_melted, aes(x = Method, y = Scenario, fill =
   annotation_custom(grob = table_grob,
                     xmin = 7.5, xmax = 10, ymin = -400, ymax = 600)  # Adjust these values to place the table
 
-ggsave(filename = "./Comparison2/Results2/RankHeatmap_2.png",
-       plot = rankHeatmap2,
+ggsave(filename = "./Comparison1/Results1/RankHeatmap_1.png",
+       plot = rankHeatmap1,
        width  = 5000, height = 2500, units  = "px")
 
 # Most Powerful Method Tables --------------------------------------------------
@@ -372,8 +370,8 @@ allBestCases <- allBest %>%
 #View(allBestRaw)
 #View(allBestCases)
 
-write.csv(allBestRaw, file = "./Comparison2/Results2/BestAll_2.csv")
-write.csv(allBestCases, file = "./Comparison2/Results2/BestAllCases_2.csv")
+write.csv(allBestRaw, file = "./Comparison1/Results1/BestAll_1.csv")
+write.csv(allBestCases, file = "./Comparison1/Results1/BestAllCases_1.csv")
 
 # Result table based on standardized effect sizes ------------------------------
 
@@ -464,6 +462,20 @@ allBestCases_std <- allBest_std %>%
                           paste0(round(.x/n*100, 2), "% (n = ", .x, ")"))))
 
 
-write.csv(allBestRaw_std, file = "./Comparison2/Results2/BestAll_2_STD.csv")
-write.csv(allBestCases_std, file = "./Comparison2/Results2/BestAllCases_2_STD.csv")
+write.csv(allBestRaw_std, file = "./Comparison1/Results1/BestAll_1_STD.csv")
+write.csv(allBestCases_std, file = "./Comparison1/Results1/BestAllCases_1_STD.csv")
+
+# Analyzing methods 4 and 5 specifically ---------------------------------------
+
+# View(mutate(powerTable, method4biggerthan5 = ifelse(method4_Chi2 > method5_MVN, "Yes", "No")))
+# power5better4 <- powerTable %>%
+#   dplyr::filter(method4_Chi2 < method5_MVN) %>% # analyze later
+#   dplyr::select(-alpha, -r, -method1_bonf, -method1_sidak, -method1_dap, -method2, -method3) %>%
+#   mutate(difference = method5_MVN - method4_Chi2) %>%
+#   pivot_longer(c(K, m, beta1, beta2, varY1, varY2, rho01, rho02, rho1, rho2),
+#                names_to = "Parameter", values_to = "Value")
+#
+# ggplot(aes(x = Value, y = difference), data = power5better4) + geom_point() +
+#   facet_wrap(~Parameter, scales = "free")
+
 
