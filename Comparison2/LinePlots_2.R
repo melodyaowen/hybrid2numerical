@@ -1,6 +1,6 @@
 source("./RequiredPackages.R")
 
-# "Comparison 1"
+# "Comparison 2"
 # "As is" comparison using the Chi^2 distribution and MVN distribution
 # Method 5 is two 1-sided tests, as is in the paper and package
 
@@ -661,7 +661,7 @@ combined_graph_1 <- ggplot(combinedData, aes(x = Value, y = Power,
 
 combined_graph_1
 
-ggsave(filename = "./Comparison1/Results1/LineGraph1_1.png",
+ggsave(filename = "./Comparison2/Results2/LineGraph1_2.png",
        plot = combined_graph_1,
        width = 2800, height = 1800, units = "px")
 
@@ -695,7 +695,7 @@ combined_graph_2 <- ggplot(combinedData2, aes(x = Value, y = Power,
 
 combined_graph_2
 
-ggsave(filename = "./Comparison1/Results1/LineGraph2_1.png",
+ggsave(filename = "./Comparison2/Results2/LineGraph2_2.png",
        plot = combined_graph_2,
        width = 2800, height = 1800, units = "px")
 

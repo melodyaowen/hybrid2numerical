@@ -1,7 +1,7 @@
 source("./RequiredPackages.R")
-source("./Comparison2/Method5_2sided.R")
+source("./Comparison1/Method5_2sided.R")
 
-# "Comparison 2"
+# "Comparison 1"
 # "2-sided" comparison using the Chi^2 distribution and MVN distribution
 # Method 5 is two 2-sided tests, we use a new function defined for this purpose
 # and not the package function
@@ -663,7 +663,7 @@ combined_graph_1 <- ggplot(combinedData, aes(x = Value, y = Power,
 
 combined_graph_1
 
-ggsave(filename = "./Comparison2/Results2/LineGraph1_2.png",
+ggsave(filename = "./Comparison1/Results1/LineGraph1_1.png",
        plot = combined_graph_1,
        width = 2800, height = 1800, units = "px")
 
@@ -697,7 +697,7 @@ combined_graph_2 <- ggplot(combinedData2, aes(x = Value, y = Power,
 
 combined_graph_2
 
-ggsave(filename = "./Comparison2/Results2/LineGraph2_2.png",
+ggsave(filename = "./Comparison1/Results1/LineGraph2_1.png",
        plot = combined_graph_2,
        width = 2800, height = 1800, units = "px")
 

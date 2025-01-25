@@ -1,6 +1,6 @@
 source("./RequiredPackages.R")
 
-# "Comparison 1"
+# "Comparison 2"
 # "As is" comparison using the Chi^2 distribution and MVN distribution
 # Method 5 is two 1-sided tests, as is in the paper and package
 
@@ -117,7 +117,7 @@ mostPowerful <- powerTable %>%
 
 View(mostPowerful)
 
-write.csv(mostPowerful, file = "./Comparison1/Results1/MostPowerful_1.csv")
+write.csv(mostPowerful, file = "./Comparison2/Results2/MostPowerful_2.csv")
 
 # Frequency of how many times a method is least powerful
 leastPowerful <- powerTable %>%
@@ -137,7 +137,7 @@ leastPowerful <- powerTable %>%
   mutate(Percent = paste0(round((n/nrow(numParameters))*100, 2), "%"))
 
 View(leastPowerful)
-write.csv(leastPowerful, file = "./Comparison1/Results1/LeastPowerful_1.csv")
+write.csv(leastPowerful, file = "./Comparison2/Results2/LeastPowerful_2.csv")
 
 # Power Histogram --------------------------------------------------------------
 
@@ -165,7 +165,7 @@ summaryStats <- powerLong %>%
             Min = round(min(Power), 2),
             Max = round(max(Power), 2))
 
-powerHistogram1 <- ggplot(data = powerLong, aes(Power)) +
+powerHistogram <- ggplot(data = powerLong, aes(Power)) +
   geom_histogram(bins = 30, fill = 'blue') +
   facet_wrap(~`Method Label`) +
   ylab("Count") +
@@ -181,8 +181,8 @@ powerHistogram1 <- ggplot(data = powerLong, aes(Power)) +
             size = 4) +
   theme(text = element_text(size = 20))
 
-ggsave(filename = "./Comparison1/Results1/PowerHistogram_1.png",
-       plot = powerHistogram1,
+ggsave(filename = "./Comparison2/Results2/PowerHistogram_2.png",
+       plot = powerHistogram,
        width  = 5000, height = 3000, units  = "px")
 
 # Ranking Heatmap --------------------------------------------------------------
@@ -250,7 +250,7 @@ rankHeatmap1 <- ggplot(rank_summary_melted, aes(x = Method, y = Scenario, fill =
   annotation_custom(grob = table_grob,
                     xmin = 7.5, xmax = 10, ymin = -400, ymax = 600)  # Adjust these values to place the table
 
-ggsave(filename = "./Comparison1/Results1/RankHeatmap_1.png",
+ggsave(filename = "./Comparison2/Results2/RankHeatmap_2.png",
        plot = rankHeatmap1,
        width  = 5000, height = 2500, units  = "px")
 
@@ -370,8 +370,8 @@ allBestCases <- allBest %>%
 #View(allBestRaw)
 #View(allBestCases)
 
-write.csv(allBestRaw, file = "./Comparison1/Results1/BestAll_1.csv")
-write.csv(allBestCases, file = "./Comparison1/Results1/BestAllCases_1.csv")
+write.csv(allBestRaw, file = "./Comparison2/Results2/BestAll_2.csv")
+write.csv(allBestCases, file = "./Comparison2/Results2/BestAllCases_2.csv")
 
 # Result table based on standardized effect sizes ------------------------------
 
@@ -462,8 +462,8 @@ allBestCases_std <- allBest_std %>%
                           paste0(round(.x/n*100, 2), "% (n = ", .x, ")"))))
 
 
-write.csv(allBestRaw_std, file = "./Comparison1/Results1/BestAll_1_STD.csv")
-write.csv(allBestCases_std, file = "./Comparison1/Results1/BestAllCases_1_STD.csv")
+write.csv(allBestRaw_std, file = "./Comparison2/Results2/BestAll_2_STD.csv")
+write.csv(allBestCases_std, file = "./Comparison2/Results2/BestAllCases_2_STD.csv")
 
 # Analyzing methods 4 and 5 specifically ---------------------------------------
 
