@@ -12,9 +12,10 @@ create_standardized_table <- function(file_in = NA,
                               TRUE ~ NA_real_)))
 
   tableDat <- myDat %>%
-    filter(eff2minus1 >= 0) %>%
+    #filter(eff2minus1 >= 0) %>%
     mutate(
       eff2minus1_group = case_when(
+        eff2minus1 < 0 ~ "-",
         eff2minus1 == 0 ~ "0",
         eff2minus1 > 0    & eff2minus1 <= 0.19 ~ "0.05 to 0.19",
         eff2minus1 > 0.19 & eff2minus1 <= 0.29 ~ "0.20 to 0.29",
