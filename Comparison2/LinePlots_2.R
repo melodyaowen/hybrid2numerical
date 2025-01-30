@@ -1,8 +1,10 @@
 source("./RequiredPackages.R")
+source("./Comparison2/Method5_2sided_T.R")
 
 # "Comparison 2"
-# "As is" comparison using the Chi^2 distribution and MVN distribution
-# Method 5 is two 1-sided tests, as is in the paper and package
+# "2-sided" comparison using the F-distribution and t-distribution
+# Method 5 is two 2-sided tests, we use a new function defined for this purpose
+# and not the package function
 
 # Varying Rho1 -----------------------------------------------------------------
 # Table of all Parameters
@@ -30,50 +32,50 @@ powerTable_Rho1 <- numParameters_Rho1 %>%
                                             varY1 = varY1, varY2 = varY2,
                                             rho01 = rho01, rho02 = rho02,
                                             rho2  = rho2, r = r,
-                                            dist = "Chi2")$'Final Power'[[1]],
+                                            dist = "F")$'Final Power'[[1]],
          'method1_sidak' = calc_pwr_pval_adj(K = K, m = m, alpha = alpha,
                                              beta1 = beta1, beta2 = beta2,
                                              varY1 = varY1, varY2 = varY2,
                                              rho01 = rho01, rho02 = rho02,
                                              rho2  = rho2, r = r,
-                                             dist = "Chi2")$'Final Power'[[2]],
+                                             dist = "F")$'Final Power'[[2]],
          'method1_dap' = calc_pwr_pval_adj(K = K, m = m, alpha = alpha,
                                            beta1 = beta1, beta2 = beta2,
                                            varY1 = varY1, varY2 = varY2,
                                            rho01 = rho01, rho02 = rho02,
                                            rho2  = rho2, r = r,
-                                           dist = "Chi2")$'Final Power'[[3]],
+                                           dist = "F")$'Final Power'[[3]],
          'method2' = calc_pwr_comb_outcome(K = K, m = m, alpha = alpha,
                                            beta1 = beta1, beta2 = beta2,
                                            varY1 = varY1, varY2 = varY2,
                                            rho01 = rho01, rho02 = rho02,
                                            rho1 = rho1, rho2  = rho2, r = r,
-                                           dist = "Chi2"),
+                                           dist = "F"),
          'method3' = calc_pwr_single_1dftest(K = K, m = m, alpha = alpha,
                                              beta1 = beta1, beta2 = beta2,
                                              varY1 = varY1, varY2 = varY2,
                                              rho01 = rho01, rho02 = rho02,
                                              rho1 = rho1, rho2  = rho2, r = r,
-                                             dist = "Chi2"),
-         'method4_Chi2' = calc_pwr_disj_2dftest(K = K, m = m, alpha = alpha,
-                                                beta1 = beta1, beta2 = beta2,
-                                                varY1 = varY1, varY2 = varY2,
-                                                rho01 = rho01, rho02 = rho02,
-                                                rho1 = rho1, rho2  = rho2,
-                                                r = r, dist = "Chi2"),
-         'method5_MVN' = calc_pwr_conj_test(K = K, m = m, alpha = alpha,
-                                            beta1 = beta1, beta2 = beta2,
-                                            varY1 = varY1, varY2 = varY2,
-                                            rho01 = rho01, rho02 = rho02,
-                                            rho1 = rho1, rho2  = rho2,
-                                            r = r, dist = "MVN")) %>%
+                                             dist = "F"),
+         'method4_F' = calc_pwr_disj_2dftest(K = K, m = m, alpha = alpha,
+                                             beta1 = beta1, beta2 = beta2,
+                                             varY1 = varY1, varY2 = varY2,
+                                             rho01 = rho01, rho02 = rho02,
+                                             rho1 = rho1, rho2  = rho2,
+                                             r = r, dist = "F"),
+         'method5_T' = calc_pwr_conj_test_2sided_T(K = K, m = m, alpha = alpha,
+                                                   beta1 = beta1, beta2 = beta2,
+                                                   varY1 = varY1, varY2 = varY2,
+                                                   rho01 = rho01, rho02 = rho02,
+                                                   rho1 = rho1, rho2  = rho2,
+                                                   r = r, dist = "T")) %>%
   mutate_at(vars(contains('method')), funs(.*100))
 
 #View(powerTable_Rho1)
 
 plotData_Rho1 <- powerTable_Rho1 %>%
   pivot_longer(cols = c("method1_bonf", "method1_sidak", "method1_dap",
-                        "method2", "method3", "method4_Chi2", "method5_MVN"),
+                        "method2", "method3", "method4_F", "method5_T"),
                names_to = "Method",
                values_to = "Power") %>%
   mutate(Method = fct_recode(Method,
@@ -82,8 +84,8 @@ plotData_Rho1 <- powerTable_Rho1 %>%
                              "1. P-Value Adjustment (D/AP)" = "method1_dap",
                              "2. Combined Outcomes" = "method2",
                              "3. Single 1-DF Test" = "method3",
-                             "4. Disjunctive 2-DF" = "method4_Chi2",
-                             "5. Conjunctive IU Test (MVN-Dist)" = "method5_MVN"))
+                             "4. Disjunctive 2-DF" = "method4_F",
+                             "5. Conjunctive IU Test (t-Dist)" = "method5_T"))
 
 # Line graphs of Rho1
 rho1_graph <- ggplot(plotData_Rho1, aes(x = rho1, y = Power,
@@ -119,50 +121,50 @@ powerTable_Rho2 <- numParameters_Rho2 %>%
                                             varY1 = varY1, varY2 = varY2,
                                             rho01 = rho01, rho02 = rho02,
                                             rho2  = rho2, r = r,
-                                            dist = "Chi2")$'Final Power'[[1]],
+                                            dist = "F")$'Final Power'[[1]],
          'method1_sidak' = calc_pwr_pval_adj(K = K, m = m, alpha = alpha,
                                              beta1 = beta1, beta2 = beta2,
                                              varY1 = varY1, varY2 = varY2,
                                              rho01 = rho01, rho02 = rho02,
                                              rho2  = rho2, r = r,
-                                             dist = "Chi2")$'Final Power'[[2]],
+                                             dist = "F")$'Final Power'[[2]],
          'method1_dap' = calc_pwr_pval_adj(K = K, m = m, alpha = alpha,
                                            beta1 = beta1, beta2 = beta2,
                                            varY1 = varY1, varY2 = varY2,
                                            rho01 = rho01, rho02 = rho02,
                                            rho2  = rho2, r = r,
-                                           dist = "Chi2")$'Final Power'[[3]],
+                                           dist = "F")$'Final Power'[[3]],
          'method2' = calc_pwr_comb_outcome(K = K, m = m, alpha = alpha,
                                            beta1 = beta1, beta2 = beta2,
                                            varY1 = varY1, varY2 = varY2,
                                            rho01 = rho01, rho02 = rho02,
                                            rho1 = rho1, rho2  = rho2, r = r,
-                                           dist = "Chi2"),
+                                           dist = "F"),
          'method3' = calc_pwr_single_1dftest(K = K, m = m, alpha = alpha,
                                              beta1 = beta1, beta2 = beta2,
                                              varY1 = varY1, varY2 = varY2,
                                              rho01 = rho01, rho02 = rho02,
                                              rho1 = rho1, rho2  = rho2, r = r,
-                                             dist = "Chi2"),
-         'method4_Chi2' = calc_pwr_disj_2dftest(K = K, m = m, alpha = alpha,
-                                                beta1 = beta1, beta2 = beta2,
-                                                varY1 = varY1, varY2 = varY2,
-                                                rho01 = rho01, rho02 = rho02,
-                                                rho1 = rho1, rho2  = rho2,
-                                                r = r, dist = "Chi2"),
-         'method5_MVN' = calc_pwr_conj_test(K = K, m = m, alpha = alpha,
-                                            beta1 = beta1, beta2 = beta2,
-                                            varY1 = varY1, varY2 = varY2,
-                                            rho01 = rho01, rho02 = rho02,
-                                            rho1 = rho1, rho2  = rho2,
-                                            r = r, dist = "MVN")) %>%
+                                             dist = "F"),
+         'method4_F' = calc_pwr_disj_2dftest(K = K, m = m, alpha = alpha,
+                                             beta1 = beta1, beta2 = beta2,
+                                             varY1 = varY1, varY2 = varY2,
+                                             rho01 = rho01, rho02 = rho02,
+                                             rho1 = rho1, rho2  = rho2,
+                                             r = r, dist = "F"),
+         'method5_T' = calc_pwr_conj_test_2sided_T(K = K, m = m, alpha = alpha,
+                                                   beta1 = beta1, beta2 = beta2,
+                                                   varY1 = varY1, varY2 = varY2,
+                                                   rho01 = rho01, rho02 = rho02,
+                                                   rho1 = rho1, rho2  = rho2,
+                                                   r = r, dist = "T")) %>%
   mutate_at(vars(contains('method')), funs(.*100))
 
 #View(powerTable_Rho2)
 
 plotData_Rho2 <- powerTable_Rho2 %>%
   pivot_longer(cols = c("method1_bonf", "method1_sidak", "method1_dap",
-                        "method2", "method3", "method4_Chi2", "method5_MVN"),
+                        "method2", "method3", "method4_F", "method5_T"),
                names_to = "Method",
                values_to = "Power") %>%
   mutate(Method = fct_recode(Method,
@@ -171,8 +173,8 @@ plotData_Rho2 <- powerTable_Rho2 %>%
                              "1. P-Value Adjustment (D/AP)" = "method1_dap",
                              "2. Combined Outcomes" = "method2",
                              "3. Single 1-DF Test" = "method3",
-                             "4. Disjunctive 2-DF" = "method4_Chi2",
-                             "5. Conjunctive IU Test (MVN-Dist)" = "method5_MVN"))
+                             "4. Disjunctive 2-DF" = "method4_F",
+                             "5. Conjunctive IU Test (t-Dist)" = "method5_T"))
 
 # Line graphs of Rho2
 rho2_graph <- ggplot(plotData_Rho2, aes(x = rho2, y = Power,
@@ -209,43 +211,43 @@ powerTable_Betas <- numParameters_Betas %>%
                                             varY1 = varY1, varY2 = varY2,
                                             rho01 = rho01, rho02 = rho02,
                                             rho2  = rho2, r = r,
-                                            dist = "Chi2")$'Final Power'[[1]],
+                                            dist = "F")$'Final Power'[[1]],
          'method1_sidak' = calc_pwr_pval_adj(K = K, m = m, alpha = alpha,
                                              beta1 = beta1, beta2 = beta2,
                                              varY1 = varY1, varY2 = varY2,
                                              rho01 = rho01, rho02 = rho02,
                                              rho2  = rho2, r = r,
-                                             dist = "Chi2")$'Final Power'[[2]],
+                                             dist = "F")$'Final Power'[[2]],
          'method1_dap' = calc_pwr_pval_adj(K = K, m = m, alpha = alpha,
                                            beta1 = beta1, beta2 = beta2,
                                            varY1 = varY1, varY2 = varY2,
                                            rho01 = rho01, rho02 = rho02,
                                            rho2  = rho2, r = r,
-                                           dist = "Chi2")$'Final Power'[[3]],
+                                           dist = "F")$'Final Power'[[3]],
          'method2' = calc_pwr_comb_outcome(K = K, m = m, alpha = alpha,
                                            beta1 = beta1, beta2 = beta2,
                                            varY1 = varY1, varY2 = varY2,
                                            rho01 = rho01, rho02 = rho02,
                                            rho1 = rho1, rho2  = rho2, r = r,
-                                           dist = "Chi2"),
+                                           dist = "F"),
          'method3' = calc_pwr_single_1dftest(K = K, m = m, alpha = alpha,
                                              beta1 = beta1, beta2 = beta2,
                                              varY1 = varY1, varY2 = varY2,
                                              rho01 = rho01, rho02 = rho02,
                                              rho1 = rho1, rho2  = rho2, r = r,
-                                             dist = "Chi2"),
-         'method4_Chi2' = calc_pwr_disj_2dftest(K = K, m = m, alpha = alpha,
-                                                beta1 = beta1, beta2 = beta2,
-                                                varY1 = varY1, varY2 = varY2,
-                                                rho01 = rho01, rho02 = rho02,
-                                                rho1 = rho1, rho2  = rho2,
-                                                r = r, dist = "Chi2"),
-         'method5_MVN' = calc_pwr_conj_test(K = K, m = m, alpha = alpha,
-                                            beta1 = beta1, beta2 = beta2,
-                                            varY1 = varY1, varY2 = varY2,
-                                            rho01 = rho01, rho02 = rho02,
-                                            rho1 = rho1, rho2  = rho2,
-                                            r = r, dist = "MVN")) %>%
+                                             dist = "F"),
+         'method4_F' = calc_pwr_disj_2dftest(K = K, m = m, alpha = alpha,
+                                             beta1 = beta1, beta2 = beta2,
+                                             varY1 = varY1, varY2 = varY2,
+                                             rho01 = rho01, rho02 = rho02,
+                                             rho1 = rho1, rho2  = rho2,
+                                             r = r, dist = "F"),
+         'method5_T' = calc_pwr_conj_test_2sided_T(K = K, m = m, alpha = alpha,
+                                                   beta1 = beta1, beta2 = beta2,
+                                                   varY1 = varY1, varY2 = varY2,
+                                                   rho01 = rho01, rho02 = rho02,
+                                                   rho1 = rho1, rho2  = rho2,
+                                                   r = r, dist = "T")) %>%
   mutate_at(vars(contains('method')), funs(.*100))
 
 #View(powerTable_Betas)
@@ -253,7 +255,7 @@ powerTable_Betas <- numParameters_Betas %>%
 plotData_Betas <- powerTable_Betas %>%
   mutate(BetaRatio = beta2/beta1) %>%
   pivot_longer(cols = c("method1_bonf", "method1_sidak", "method1_dap",
-                        "method2", "method3", "method4_Chi2", "method5_MVN"),
+                        "method2", "method3", "method4_F", "method5_T"),
                names_to = "Method",
                values_to = "Power") %>%
   mutate(Method = fct_recode(Method,
@@ -262,8 +264,8 @@ plotData_Betas <- powerTable_Betas %>%
                              "1. P-Value Adjustment (D/AP)" = "method1_dap",
                              "2. Combined Outcomes" = "method2",
                              "3. Single 1-DF Test" = "method3",
-                             "4. Disjunctive 2-DF" = "method4_Chi2",
-                             "5. Conjunctive IU Test (MVN-Dist)" = "method5_MVN"))
+                             "4. Disjunctive 2-DF" = "method4_F",
+                             "5. Conjunctive IU Test (t-Dist)" = "method5_T"))
 
 # Line graphs of Beta ratios
 betas_graph <- ggplot(plotData_Betas, aes(x = BetaRatio, y = Power,
@@ -299,43 +301,43 @@ powerTable_ICCs <- numParameters_ICCs %>%
                                             varY1 = varY1, varY2 = varY2,
                                             rho01 = rho01, rho02 = rho02,
                                             rho2  = rho2, r = r,
-                                            dist = "Chi2")$'Final Power'[[1]],
+                                            dist = "F")$'Final Power'[[1]],
          'method1_sidak' = calc_pwr_pval_adj(K = K, m = m, alpha = alpha,
                                              beta1 = beta1, beta2 = beta2,
                                              varY1 = varY1, varY2 = varY2,
                                              rho01 = rho01, rho02 = rho02,
                                              rho2  = rho2, r = r,
-                                             dist = "Chi2")$'Final Power'[[2]],
+                                             dist = "F")$'Final Power'[[2]],
          'method1_dap' = calc_pwr_pval_adj(K = K, m = m, alpha = alpha,
                                            beta1 = beta1, beta2 = beta2,
                                            varY1 = varY1, varY2 = varY2,
                                            rho01 = rho01, rho02 = rho02,
                                            rho2  = rho2, r = r,
-                                           dist = "Chi2")$'Final Power'[[3]],
+                                           dist = "F")$'Final Power'[[3]],
          'method2' = calc_pwr_comb_outcome(K = K, m = m, alpha = alpha,
                                            beta1 = beta1, beta2 = beta2,
                                            varY1 = varY1, varY2 = varY2,
                                            rho01 = rho01, rho02 = rho02,
                                            rho1 = rho1, rho2  = rho2, r = r,
-                                           dist = "Chi2"),
+                                           dist = "F"),
          'method3' = calc_pwr_single_1dftest(K = K, m = m, alpha = alpha,
                                              beta1 = beta1, beta2 = beta2,
                                              varY1 = varY1, varY2 = varY2,
                                              rho01 = rho01, rho02 = rho02,
                                              rho1 = rho1, rho2  = rho2, r = r,
-                                             dist = "Chi2"),
-         'method4_Chi2' = calc_pwr_disj_2dftest(K = K, m = m, alpha = alpha,
-                                                beta1 = beta1, beta2 = beta2,
-                                                varY1 = varY1, varY2 = varY2,
-                                                rho01 = rho01, rho02 = rho02,
-                                                rho1 = rho1, rho2  = rho2,
-                                                r = r, dist = "Chi2"),
-         'method5_MVN' = calc_pwr_conj_test(K = K, m = m, alpha = alpha,
-                                            beta1 = beta1, beta2 = beta2,
-                                            varY1 = varY1, varY2 = varY2,
-                                            rho01 = rho01, rho02 = rho02,
-                                            rho1 = rho1, rho2  = rho2,
-                                            r = r, dist = "MVN")) %>%
+                                             dist = "F"),
+         'method4_F' = calc_pwr_disj_2dftest(K = K, m = m, alpha = alpha,
+                                             beta1 = beta1, beta2 = beta2,
+                                             varY1 = varY1, varY2 = varY2,
+                                             rho01 = rho01, rho02 = rho02,
+                                             rho1 = rho1, rho2  = rho2,
+                                             r = r, dist = "F"),
+         'method5_T' = calc_pwr_conj_test_2sided_T(K = K, m = m, alpha = alpha,
+                                                   beta1 = beta1, beta2 = beta2,
+                                                   varY1 = varY1, varY2 = varY2,
+                                                   rho01 = rho01, rho02 = rho02,
+                                                   rho1 = rho1, rho2  = rho2,
+                                                   r = r, dist = "T")) %>%
   mutate_at(vars(contains('method')), funs(.*100))
 
 #View(powerTable_ICCs)
@@ -343,7 +345,7 @@ powerTable_ICCs <- numParameters_ICCs %>%
 plotData_ICCs <- powerTable_ICCs %>%
   mutate(ICCsRatio = rho02/rho01) %>%
   pivot_longer(cols = c("method1_bonf", "method1_sidak", "method1_dap",
-                        "method2", "method3", "method4_Chi2", "method5_MVN"),
+                        "method2", "method3", "method4_F", "method5_T"),
                names_to = "Method",
                values_to = "Power") %>%
   mutate(Method = fct_recode(Method,
@@ -352,8 +354,8 @@ plotData_ICCs <- powerTable_ICCs %>%
                              "1. P-Value Adjustment (D/AP)" = "method1_dap",
                              "2. Combined Outcomes" = "method2",
                              "3. Single 1-DF Test" = "method3",
-                             "4. Disjunctive 2-DF" = "method4_Chi2",
-                             "5. Conjunctive IU Test (MVN-Dist)" = "method5_MVN"))
+                             "4. Disjunctive 2-DF" = "method4_F",
+                             "5. Conjunctive IU Test (t-Dist)" = "method5_T"))
 
 # Line graphs of ICC ratios
 ICCs_graph <- ggplot(plotData_ICCs, aes(x = ICCsRatio, y = Power,
@@ -390,43 +392,43 @@ powerTable_Vars <- numParameters_Vars %>%
                                             varY1 = varY1, varY2 = varY2,
                                             rho01 = rho01, rho02 = rho02,
                                             rho2  = rho2, r = r,
-                                            dist = "Chi2")$'Final Power'[[1]],
+                                            dist = "F")$'Final Power'[[1]],
          'method1_sidak' = calc_pwr_pval_adj(K = K, m = m, alpha = alpha,
                                              beta1 = beta1, beta2 = beta2,
                                              varY1 = varY1, varY2 = varY2,
                                              rho01 = rho01, rho02 = rho02,
                                              rho2  = rho2, r = r,
-                                             dist = "Chi2")$'Final Power'[[2]],
+                                             dist = "F")$'Final Power'[[2]],
          'method1_dap' = calc_pwr_pval_adj(K = K, m = m, alpha = alpha,
                                            beta1 = beta1, beta2 = beta2,
                                            varY1 = varY1, varY2 = varY2,
                                            rho01 = rho01, rho02 = rho02,
                                            rho2  = rho2, r = r,
-                                           dist = "Chi2")$'Final Power'[[3]],
+                                           dist = "F")$'Final Power'[[3]],
          'method2' = calc_pwr_comb_outcome(K = K, m = m, alpha = alpha,
                                            beta1 = beta1, beta2 = beta2,
                                            varY1 = varY1, varY2 = varY2,
                                            rho01 = rho01, rho02 = rho02,
                                            rho1 = rho1, rho2  = rho2, r = r,
-                                           dist = "Chi2"),
+                                           dist = "F"),
          'method3' = calc_pwr_single_1dftest(K = K, m = m, alpha = alpha,
                                              beta1 = beta1, beta2 = beta2,
                                              varY1 = varY1, varY2 = varY2,
                                              rho01 = rho01, rho02 = rho02,
                                              rho1 = rho1, rho2  = rho2, r = r,
-                                             dist = "Chi2"),
-         'method4_Chi2' = calc_pwr_disj_2dftest(K = K, m = m, alpha = alpha,
-                                                beta1 = beta1, beta2 = beta2,
-                                                varY1 = varY1, varY2 = varY2,
-                                                rho01 = rho01, rho02 = rho02,
-                                                rho1 = rho1, rho2  = rho2,
-                                                r = r, dist = "Chi2"),
-         'method5_MVN' = calc_pwr_conj_test(K = K, m = m, alpha = alpha,
-                                            beta1 = beta1, beta2 = beta2,
-                                            varY1 = varY1, varY2 = varY2,
-                                            rho01 = rho01, rho02 = rho02,
-                                            rho1 = rho1, rho2  = rho2,
-                                            r = r, dist = "MVN")) %>%
+                                             dist = "F"),
+         'method4_F' = calc_pwr_disj_2dftest(K = K, m = m, alpha = alpha,
+                                             beta1 = beta1, beta2 = beta2,
+                                             varY1 = varY1, varY2 = varY2,
+                                             rho01 = rho01, rho02 = rho02,
+                                             rho1 = rho1, rho2  = rho2,
+                                             r = r, dist = "F"),
+         'method5_T' = calc_pwr_conj_test_2sided_T(K = K, m = m, alpha = alpha,
+                                                   beta1 = beta1, beta2 = beta2,
+                                                   varY1 = varY1, varY2 = varY2,
+                                                   rho01 = rho01, rho02 = rho02,
+                                                   rho1 = rho1, rho2  = rho2,
+                                                   r = r, dist = "T")) %>%
   mutate_at(vars(contains('method')), funs(.*100))
 
 #View(powerTable_Vars)
@@ -434,7 +436,7 @@ powerTable_Vars <- numParameters_Vars %>%
 plotData_Vars <- powerTable_Vars %>%
   mutate(VarsRatio = varY2/varY1) %>%
   pivot_longer(cols = c("method1_bonf", "method1_sidak", "method1_dap",
-                        "method2", "method3", "method4_Chi2", "method5_MVN"),
+                        "method2", "method3", "method4_F", "method5_T"),
                names_to = "Method",
                values_to = "Power") %>%
   mutate(Method = fct_recode(Method,
@@ -443,8 +445,8 @@ plotData_Vars <- powerTable_Vars %>%
                              "1. P-Value Adjustment (D/AP)" = "method1_dap",
                              "2. Combined Outcomes" = "method2",
                              "3. Single 1-DF Test" = "method3",
-                             "4. Disjunctive 2-DF" = "method4_Chi2",
-                             "5. Conjunctive IU Test (MVN-Dist)" = "method5_MVN"))
+                             "4. Disjunctive 2-DF" = "method4_F",
+                             "5. Conjunctive IU Test (t-Dist)" = "method5_T"))
 
 # Line graphs of Variance ratios
 vars_graph <- ggplot(plotData_Vars, aes(x = VarsRatio, y = Power,
@@ -481,50 +483,50 @@ powerTable_K <- numParameters_K %>%
                                             varY1 = varY1, varY2 = varY2,
                                             rho01 = rho01, rho02 = rho02,
                                             rho2  = rho2, r = r,
-                                            dist = "Chi2")$'Final Power'[[1]],
+                                            dist = "F")$'Final Power'[[1]],
          'method1_sidak' = calc_pwr_pval_adj(K = K, m = m, alpha = alpha,
                                              beta1 = beta1, beta2 = beta2,
                                              varY1 = varY1, varY2 = varY2,
                                              rho01 = rho01, rho02 = rho02,
                                              rho2  = rho2, r = r,
-                                             dist = "Chi2")$'Final Power'[[2]],
+                                             dist = "F")$'Final Power'[[2]],
          'method1_dap' = calc_pwr_pval_adj(K = K, m = m, alpha = alpha,
                                            beta1 = beta1, beta2 = beta2,
                                            varY1 = varY1, varY2 = varY2,
                                            rho01 = rho01, rho02 = rho02,
                                            rho2  = rho2, r = r,
-                                           dist = "Chi2")$'Final Power'[[3]],
+                                           dist = "F")$'Final Power'[[3]],
          'method2' = calc_pwr_comb_outcome(K = K, m = m, alpha = alpha,
                                            beta1 = beta1, beta2 = beta2,
                                            varY1 = varY1, varY2 = varY2,
                                            rho01 = rho01, rho02 = rho02,
                                            rho1 = rho1, rho2  = rho2, r = r,
-                                           dist = "Chi2"),
+                                           dist = "F"),
          'method3' = calc_pwr_single_1dftest(K = K, m = m, alpha = alpha,
                                              beta1 = beta1, beta2 = beta2,
                                              varY1 = varY1, varY2 = varY2,
                                              rho01 = rho01, rho02 = rho02,
                                              rho1 = rho1, rho2  = rho2, r = r,
-                                             dist = "Chi2"),
-         'method4_Chi2' = calc_pwr_disj_2dftest(K = K, m = m, alpha = alpha,
-                                                beta1 = beta1, beta2 = beta2,
-                                                varY1 = varY1, varY2 = varY2,
-                                                rho01 = rho01, rho02 = rho02,
-                                                rho1 = rho1, rho2  = rho2,
-                                                r = r, dist = "Chi2"),
-         'method5_MVN' = calc_pwr_conj_test(K = K, m = m, alpha = alpha,
-                                            beta1 = beta1, beta2 = beta2,
-                                            varY1 = varY1, varY2 = varY2,
-                                            rho01 = rho01, rho02 = rho02,
-                                            rho1 = rho1, rho2  = rho2,
-                                            r = r, dist = "MVN")) %>%
+                                             dist = "F"),
+         'method4_F' = calc_pwr_disj_2dftest(K = K, m = m, alpha = alpha,
+                                             beta1 = beta1, beta2 = beta2,
+                                             varY1 = varY1, varY2 = varY2,
+                                             rho01 = rho01, rho02 = rho02,
+                                             rho1 = rho1, rho2  = rho2,
+                                             r = r, dist = "F"),
+         'method5_T' = calc_pwr_conj_test_2sided_T(K = K, m = m, alpha = alpha,
+                                                   beta1 = beta1, beta2 = beta2,
+                                                   varY1 = varY1, varY2 = varY2,
+                                                   rho01 = rho01, rho02 = rho02,
+                                                   rho1 = rho1, rho2  = rho2,
+                                                   r = r, dist = "T")) %>%
   mutate_at(vars(contains('method')), funs(.*100))
 
 #View(powerTable_K)
 
 plotData_K <- powerTable_K %>%
   pivot_longer(cols = c("method1_bonf", "method1_sidak", "method1_dap",
-                        "method2", "method3", "method4_Chi2", "method5_MVN"),
+                        "method2", "method3", "method4_F", "method5_T"),
                names_to = "Method",
                values_to = "Power") %>%
   mutate(Method = fct_recode(Method,
@@ -533,8 +535,8 @@ plotData_K <- powerTable_K %>%
                              "1. P-Value Adjustment (D/AP)" = "method1_dap",
                              "2. Combined Outcomes" = "method2",
                              "3. Single 1-DF Test" = "method3",
-                             "4. Disjunctive 2-DF" = "method4_Chi2",
-                             "5. Conjunctive IU Test (MVN-Dist)" = "method5_MVN"))
+                             "4. Disjunctive 2-DF" = "method4_F",
+                             "5. Conjunctive IU Test (t-Dist)" = "method5_T"))
 
 # Line graphs of K
 K_graph <- ggplot(plotData_K, aes(x = K, y = Power,
@@ -570,50 +572,50 @@ powerTable_m <- numParameters_m %>%
                                             varY1 = varY1, varY2 = varY2,
                                             rho01 = rho01, rho02 = rho02,
                                             rho2  = rho2, r = r,
-                                            dist = "Chi2")$'Final Power'[[1]],
+                                            dist = "F")$'Final Power'[[1]],
          'method1_sidak' = calc_pwr_pval_adj(K = K, m = m, alpha = alpha,
                                              beta1 = beta1, beta2 = beta2,
                                              varY1 = varY1, varY2 = varY2,
                                              rho01 = rho01, rho02 = rho02,
                                              rho2  = rho2, r = r,
-                                             dist = "Chi2")$'Final Power'[[2]],
+                                             dist = "F")$'Final Power'[[2]],
          'method1_dap' = calc_pwr_pval_adj(K = K, m = m, alpha = alpha,
                                            beta1 = beta1, beta2 = beta2,
                                            varY1 = varY1, varY2 = varY2,
                                            rho01 = rho01, rho02 = rho02,
                                            rho2  = rho2, r = r,
-                                           dist = "Chi2")$'Final Power'[[3]],
+                                           dist = "F")$'Final Power'[[3]],
          'method2' = calc_pwr_comb_outcome(K = K, m = m, alpha = alpha,
                                            beta1 = beta1, beta2 = beta2,
                                            varY1 = varY1, varY2 = varY2,
                                            rho01 = rho01, rho02 = rho02,
                                            rho1 = rho1, rho2  = rho2, r = r,
-                                           dist = "Chi2"),
+                                           dist = "F"),
          'method3' = calc_pwr_single_1dftest(K = K, m = m, alpha = alpha,
                                              beta1 = beta1, beta2 = beta2,
                                              varY1 = varY1, varY2 = varY2,
                                              rho01 = rho01, rho02 = rho02,
                                              rho1 = rho1, rho2  = rho2, r = r,
-                                             dist = "Chi2"),
-         'method4_Chi2' = calc_pwr_disj_2dftest(K = K, m = m, alpha = alpha,
+                                             dist = "F"),
+         'method4_F' = calc_pwr_disj_2dftest(K = K, m = m, alpha = alpha,
                                                 beta1 = beta1, beta2 = beta2,
                                                 varY1 = varY1, varY2 = varY2,
                                                 rho01 = rho01, rho02 = rho02,
                                                 rho1 = rho1, rho2  = rho2,
-                                                r = r, dist = "Chi2"),
-         'method5_MVN' = calc_pwr_conj_test(K = K, m = m, alpha = alpha,
-                                            beta1 = beta1, beta2 = beta2,
-                                            varY1 = varY1, varY2 = varY2,
-                                            rho01 = rho01, rho02 = rho02,
-                                            rho1 = rho1, rho2  = rho2,
-                                            r = r, dist = "MVN")) %>%
+                                                r = r, dist = "F"),
+         'method5_T' = calc_pwr_conj_test_2sided_T(K = K, m = m, alpha = alpha,
+                                                   beta1 = beta1, beta2 = beta2,
+                                                   varY1 = varY1, varY2 = varY2,
+                                                   rho01 = rho01, rho02 = rho02,
+                                                   rho1 = rho1, rho2  = rho2,
+                                                   r = r, dist = "T")) %>%
   mutate_at(vars(contains('method')), funs(.*100))
 
 #View(powerTable_m)
 
 plotData_m <- powerTable_m %>%
   pivot_longer(cols = c("method1_bonf", "method1_sidak", "method1_dap",
-                        "method2", "method3", "method4_Chi2", "method5_MVN"),
+                        "method2", "method3", "method4_F", "method5_T"),
                names_to = "Method",
                values_to = "Power") %>%
   mutate(Method = fct_recode(Method,
@@ -622,8 +624,8 @@ plotData_m <- powerTable_m %>%
                              "1. P-Value Adjustment (D/AP)" = "method1_dap",
                              "2. Combined Outcomes" = "method2",
                              "3. Single 1-DF Test" = "method3",
-                             "4. Disjunctive 2-DF" = "method4_Chi2",
-                             "5. Conjunctive IU Test (MVN-Dist)" = "method5_MVN"))
+                             "4. Disjunctive 2-DF" = "method4_F",
+                             "5. Conjunctive IU Test (t-Dist)" = "method5_T"))
 
 # Line graphs of m
 m_graph <- ggplot(plotData_m, aes(x = m, y = Power,

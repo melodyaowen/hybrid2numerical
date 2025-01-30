@@ -1,10 +1,8 @@
 source("./RequiredPackages.R")
-source("./Comparison3/Method5_2sided_T.R")
 
 # "Comparison 3"
-# "2-sided" comparison using the F-distribution and t-distribution
-# Method 5 is two 2-sided tests, we use a new function defined for this purpose
-# and not the package function
+# "As is" comparison using the Chi^2 distribution and MVN distribution
+# Method 5 is two 1-sided tests, as is in the paper and package
 
 # Table of all Parameters ------------------------------------------------------
 numParameters <- expand.grid(K = c(4, 6, 8, 10),
@@ -44,43 +42,43 @@ powerTable <- numParameters %>%
                                             varY1 = varY1, varY2 = varY2,
                                             rho01 = rho01, rho02 = rho02,
                                             rho2  = rho2, r = r,
-                                            dist = "F")$'Final Power'[[1]],
+                                            dist = "Chi2")$'Final Power'[[1]],
          'method1_sidak' = calc_pwr_pval_adj(K = K, m = m, alpha = alpha,
                                              beta1 = beta1, beta2 = beta2,
                                              varY1 = varY1, varY2 = varY2,
                                              rho01 = rho01, rho02 = rho02,
                                              rho2  = rho2, r = r,
-                                             dist = "F")$'Final Power'[[2]],
+                                             dist = "Chi2")$'Final Power'[[2]],
          'method1_dap' = calc_pwr_pval_adj(K = K, m = m, alpha = alpha,
                                            beta1 = beta1, beta2 = beta2,
                                            varY1 = varY1, varY2 = varY2,
                                            rho01 = rho01, rho02 = rho02,
                                            rho2  = rho2, r = r,
-                                           dist = "F")$'Final Power'[[3]],
+                                           dist = "Chi2")$'Final Power'[[3]],
          'method2' = calc_pwr_comb_outcome(K = K, m = m, alpha = alpha,
                                            beta1 = beta1, beta2 = beta2,
                                            varY1 = varY1, varY2 = varY2,
                                            rho01 = rho01, rho02 = rho02,
                                            rho1 = rho1, rho2  = rho2, r = r,
-                                           dist = "F"),
+                                           dist = "Chi2"),
          'method3' = calc_pwr_single_1dftest(K = K, m = m, alpha = alpha,
                                              beta1 = beta1, beta2 = beta2,
                                              varY1 = varY1, varY2 = varY2,
                                              rho01 = rho01, rho02 = rho02,
                                              rho1 = rho1, rho2  = rho2, r = r,
-                                             dist = "F"),
-         'method4_F' = calc_pwr_disj_2dftest(K = K, m = m, alpha = alpha,
-                                             beta1 = beta1, beta2 = beta2,
-                                             varY1 = varY1, varY2 = varY2,
-                                             rho01 = rho01, rho02 = rho02,
-                                             rho1 = rho1, rho2  = rho2,
-                                             r = r, dist = "F"),
-         'method5_T' = calc_pwr_conj_test_2sided_T(K = K, m = m, alpha = alpha,
-                                                   beta1 = beta1, beta2 = beta2,
-                                                   varY1 = varY1, varY2 = varY2,
-                                                   rho01 = rho01, rho02 = rho02,
-                                                   rho1 = rho1, rho2  = rho2,
-                                                   r = r, dist = "T")) %>%
+                                             dist = "Chi2"),
+         'method4_Chi2' = calc_pwr_disj_2dftest(K = K, m = m, alpha = alpha,
+                                                beta1 = beta1, beta2 = beta2,
+                                                varY1 = varY1, varY2 = varY2,
+                                                rho01 = rho01, rho02 = rho02,
+                                                rho1 = rho1, rho2  = rho2,
+                                                r = r, dist = "Chi2"),
+         'method5_MVN' = calc_pwr_conj_test(K = K, m = m, alpha = alpha,
+                                            beta1 = beta1, beta2 = beta2,
+                                            varY1 = varY1, varY2 = varY2,
+                                            rho01 = rho01, rho02 = rho02,
+                                            rho1 = rho1, rho2  = rho2,
+                                            r = r, dist = "MVN")) %>%
   mutate_at(vars(contains('method')), funs(.*100))
 
 View(head(powerTable))
@@ -91,7 +89,7 @@ nrow(numParameters)
 scenarios100 <- powerTable %>%
   dplyr::filter(if_any(c(method1_bonf, method1_sidak, method1_dap,
                          method2, method3,
-                         method4_F, method5_T), ~ . == 100))
+                         method4_Chi2, method5_MVN), ~ . == 100))
 
 nrow(scenarios100)
 View(scenarios100)
@@ -99,11 +97,11 @@ View(scenarios100)
 # Most and Least Powerful Tables -----------------------------------------------
 # Frequency of how many times a method is the most powerful
 methodList <- c("method1_bonf", "method1_sidak", "method1_dap",
-                "method2", "method3", "method4_F", "method5_T")
+                "method2", "method3", "method4_Chi2", "method5_MVN")
 
 mostPowerful <- powerTable %>%
   pivot_longer(cols = c("method1_bonf", "method1_sidak", "method1_dap",
-                        "method2", "method3", "method4_F", "method5_T"),
+                        "method2", "method3", "method4_Chi2", "method5_MVN"),
                names_to = "Method",
                values_to = "Power") %>%
   group_by(Scenario) %>%
@@ -124,7 +122,7 @@ write.csv(mostPowerful, file = "./Comparison3/Results3/MostPowerful_3.csv")
 # Frequency of how many times a method is least powerful
 leastPowerful <- powerTable %>%
   pivot_longer(cols = c("method1_bonf", "method1_sidak", "method1_dap",
-                        "method2", "method3", "method4_F", "method5_T"),
+                        "method2", "method3", "method4_Chi2", "method5_MVN"),
                names_to = "Method",
                values_to = "Power") %>%
   group_by(Scenario) %>%
@@ -146,7 +144,7 @@ write.csv(leastPowerful, file = "./Comparison3/Results3/LeastPowerful_3.csv")
 # Histogram of power results for methods
 powerLong <- powerTable %>%
   pivot_longer(cols = c("method1_bonf", "method1_sidak", "method1_dap",
-                        "method2", "method3", "method4_F", "method5_T"),
+                        "method2", "method3", "method4_Chi2", "method5_MVN"),
                names_to = "Method",
                values_to = "Power") %>%
   mutate("Method Label" = fct_recode(Method,
@@ -155,8 +153,8 @@ powerLong <- powerTable %>%
                                      "1. P-Value Adjustment (D/AP)" = "method1_dap",
                                      "2. Combined Outcomes" = "method2",
                                      "3. Single 1-DF Test" = "method3",
-                                     "4. Disjunctive 2-DF" = "method4_F",
-                                     "5. Conjunctive IU Test (t-Dist)" = "method5_T"))
+                                     "4. Disjunctive 2-DF" = "method4_Chi2",
+                                     "5. Conjunctive IU Test (MVN-Dist)" = "method5_MVN"))
 
 summaryStats <- powerLong %>%
   dplyr::select(`Method Label`, Power) %>%
@@ -217,8 +215,8 @@ rank_summary_melted <- melt(rank_summary_table, id.vars = "Scenario") %>%
   mutate(Method = recode(Method,
                          "method3" = "3. Single 1-DF Weighted",
                          "method2" = "2. Combined Outcomes",
-                         "method4_F" = "4. Disj. 2-DF",
-                         "method5_T" = "5. Conj. IU (t-Dist)",
+                         "method4_Chi2" = "4. Disj. 2-DF (Chi2)",
+                         "method5_MVN" = "5. Conj. IU (MVN)",
                          "method1_dap" = "1. P-Val Adj. (D/AP)",
                          "method1_sidak" = "1. P-Val Adj. (Sidak)",
                          "method1_bonf" = "1. P-Val Adj. (Bonf.)"))
@@ -230,8 +228,8 @@ mean_ranks <- rankData %>%
   mutate(Method = recode(Method,
                          "method3" = "3. Single 1-DF Weighted",
                          "method2" = "2. Combined Outcomes",
-                         "method4_F" = "4. Disj. 2-DF",
-                         "method5_T" = "5. Conj. IU (t-Dist)",
+                         "method4_Chi2" = "4. Disj. 2-DF (Chi2)",
+                         "method5_MVN" = "5. Conj. IU (MVN)",
                          "method1_dap" = "1. P-Val Adj. (D/AP)",
                          "method1_sidak" = "1. P-Val Adj. (Sidak)",
                          "method1_bonf" = "1. P-Val Adj. (Bonf.)"))
@@ -239,7 +237,7 @@ mean_ranks <- rankData %>%
 table_grob <- tableGrob(mean_ranks)
 
 # Plot with heatmap
-rankHeatmap <- ggplot(rank_summary_melted, aes(x = Method, y = Scenario, fill = value)) +
+rankHeatmap1 <- ggplot(rank_summary_melted, aes(x = Method, y = Scenario, fill = value)) +
   geom_tile() +
   scale_fill_gradient(low = "white", high = "blue", name = "Rank of Power\n(Smaller number means more powerful)") +
   scale_y_continuous(breaks = seq(0, 30000, by = 5000)) +
@@ -253,7 +251,7 @@ rankHeatmap <- ggplot(rank_summary_melted, aes(x = Method, y = Scenario, fill = 
                     xmin = 7.5, xmax = 10, ymin = -400, ymax = 600)  # Adjust these values to place the table
 
 ggsave(filename = "./Comparison3/Results3/RankHeatmap_3.png",
-       plot = rankHeatmap,
+       plot = rankHeatmap1,
        width  = 5000, height = 2500, units  = "px")
 
 # Most Powerful Method Tables --------------------------------------------------
@@ -262,7 +260,7 @@ ggsave(filename = "./Comparison3/Results3/RankHeatmap_3.png",
 # one scenario of being the most powerful among all the methods
 mostPowerfulMethodNames <- powerTable %>%
   pivot_longer(cols = c("method1_bonf", "method1_sidak", "method1_dap",
-                        "method2", "method3", "method4_F", "method5_T"),
+                        "method2", "method3", "method4_Chi2", "method5_MVN"),
                names_to = "Method",
                values_to = "Power") %>%
   group_by(Scenario) %>%
@@ -466,3 +464,18 @@ allBestCases_std <- allBest_std %>%
 
 write.csv(allBestRaw_std, file = "./Comparison3/Results3/BestAll_3_STD.csv")
 write.csv(allBestCases_std, file = "./Comparison3/Results3/BestAllCases_3_STD.csv")
+
+# Analyzing methods 4 and 5 specifically ---------------------------------------
+
+# View(mutate(powerTable, method4biggerthan5 = ifelse(method4_Chi2 > method5_MVN, "Yes", "No")))
+# power5better4 <- powerTable %>%
+#   dplyr::filter(method4_Chi2 < method5_MVN) %>% # analyze later
+#   dplyr::select(-alpha, -r, -method1_bonf, -method1_sidak, -method1_dap, -method2, -method3) %>%
+#   mutate(difference = method5_MVN - method4_Chi2) %>%
+#   pivot_longer(c(K, m, beta1, beta2, varY1, varY2, rho01, rho02, rho1, rho2),
+#                names_to = "Parameter", values_to = "Value")
+#
+# ggplot(aes(x = Value, y = difference), data = power5better4) + geom_point() +
+#   facet_wrap(~Parameter, scales = "free")
+
+
