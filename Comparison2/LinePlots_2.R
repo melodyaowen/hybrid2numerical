@@ -83,8 +83,8 @@ plotData_Rho1 <- powerTable_Rho1 %>%
                              "1. P-Value Adjustment (Sidak)" = "method1_sidak",
                              "1. P-Value Adjustment (D/AP)" = "method1_dap",
                              "2. Combined Outcomes" = "method2",
-                             "3. Single 1-DF Test" = "method3",
-                             "4. Disjunctive 2-DF" = "method4_F",
+                             "3. Single Weighted 1-DF Test" = "method3",
+                             "4. Disjunctive 2-DF Test" = "method4_F",
                              "5. Conjunctive IU Test (t-Dist)" = "method5_T"))
 
 # Line graphs of Rho1
@@ -172,8 +172,8 @@ plotData_Rho2 <- powerTable_Rho2 %>%
                              "1. P-Value Adjustment (Sidak)" = "method1_sidak",
                              "1. P-Value Adjustment (D/AP)" = "method1_dap",
                              "2. Combined Outcomes" = "method2",
-                             "3. Single 1-DF Test" = "method3",
-                             "4. Disjunctive 2-DF" = "method4_F",
+                             "3. Single Weighted 1-DF Test" = "method3",
+                             "4. Disjunctive 2-DF Test" = "method4_F",
                              "5. Conjunctive IU Test (t-Dist)" = "method5_T"))
 
 # Line graphs of Rho2
@@ -263,8 +263,8 @@ plotData_Betas <- powerTable_Betas %>%
                              "1. P-Value Adjustment (Sidak)" = "method1_sidak",
                              "1. P-Value Adjustment (D/AP)" = "method1_dap",
                              "2. Combined Outcomes" = "method2",
-                             "3. Single 1-DF Test" = "method3",
-                             "4. Disjunctive 2-DF" = "method4_F",
+                             "3. Single Weighted 1-DF Test" = "method3",
+                             "4. Disjunctive 2-DF Test" = "method4_F",
                              "5. Conjunctive IU Test (t-Dist)" = "method5_T"))
 
 # Line graphs of Beta ratios
@@ -353,8 +353,8 @@ plotData_ICCs <- powerTable_ICCs %>%
                              "1. P-Value Adjustment (Sidak)" = "method1_sidak",
                              "1. P-Value Adjustment (D/AP)" = "method1_dap",
                              "2. Combined Outcomes" = "method2",
-                             "3. Single 1-DF Test" = "method3",
-                             "4. Disjunctive 2-DF" = "method4_F",
+                             "3. Single Weighted 1-DF Test" = "method3",
+                             "4. Disjunctive 2-DF Test" = "method4_F",
                              "5. Conjunctive IU Test (t-Dist)" = "method5_T"))
 
 # Line graphs of ICC ratios
@@ -444,8 +444,8 @@ plotData_Vars <- powerTable_Vars %>%
                              "1. P-Value Adjustment (Sidak)" = "method1_sidak",
                              "1. P-Value Adjustment (D/AP)" = "method1_dap",
                              "2. Combined Outcomes" = "method2",
-                             "3. Single 1-DF Test" = "method3",
-                             "4. Disjunctive 2-DF" = "method4_F",
+                             "3. Single Weighted 1-DF Test" = "method3",
+                             "4. Disjunctive 2-DF Test" = "method4_F",
                              "5. Conjunctive IU Test (t-Dist)" = "method5_T"))
 
 # Line graphs of Variance ratios
@@ -534,8 +534,8 @@ plotData_K <- powerTable_K %>%
                              "1. P-Value Adjustment (Sidak)" = "method1_sidak",
                              "1. P-Value Adjustment (D/AP)" = "method1_dap",
                              "2. Combined Outcomes" = "method2",
-                             "3. Single 1-DF Test" = "method3",
-                             "4. Disjunctive 2-DF" = "method4_F",
+                             "3. Single Weighted 1-DF Test" = "method3",
+                             "4. Disjunctive 2-DF Test" = "method4_F",
                              "5. Conjunctive IU Test (t-Dist)" = "method5_T"))
 
 # Line graphs of K
@@ -623,8 +623,8 @@ plotData_m <- powerTable_m %>%
                              "1. P-Value Adjustment (Sidak)" = "method1_sidak",
                              "1. P-Value Adjustment (D/AP)" = "method1_dap",
                              "2. Combined Outcomes" = "method2",
-                             "3. Single 1-DF Test" = "method3",
-                             "4. Disjunctive 2-DF" = "method4_F",
+                             "3. Single Weighted 1-DF Test" = "method3",
+                             "4. Disjunctive 2-DF Test" = "method4_F",
                              "5. Conjunctive IU Test (t-Dist)" = "method5_T"))
 
 # Line graphs of m
@@ -654,12 +654,24 @@ combinedData <- plotData_Rho1 %>%
   filter(Plot == Variable) %>%
   mutate(Variable = factor(Variable, levels = c("rho1", "rho2", "ICCsRatio")))
 
+label_df <- data.frame(
+  Variable = c("ICCsRatio", "rho1", "rho2"),
+  label    = c("[1]", "[2]", "[3]")
+)
+
 combined_graph_1 <- ggplot(combinedData, aes(x = Value, y = Power,
                                              group = Method, color = Method)) +
   geom_line(linewidth = .7) + theme(text = element_text(size = 15)) +
   facet_wrap(~Variable, scales = "free_x", ncol = 2,
              labeller = as_labeller(latex_labels, label_parsed)) +
-  theme(strip.text = element_text(size = 15))
+  theme(strip.text = element_text(size = 15)) +
+  geom_text(data = label_df, aes(label = label),
+            x = -Inf,    # left edge of each facet
+            y = -Inf,    # bottom edge of each facet
+            hjust = -0.1, # slight shift inward from the margin
+            vjust = -0.5, # slight shift upward from the margin
+            size  = 3.5,
+            inherit.aes = FALSE)
 
 combined_graph_1
 
@@ -688,12 +700,24 @@ combinedData2 <- plotData_Betas %>%
   filter(Plot == Variable) %>%
   mutate(Variable = factor(Variable, levels = c("BetaRatio", "VarsRatio", "K", "m")))
 
+label_df2 <- data.frame(
+  Variable = c("BetaRatio", "K", "m", "VarsRatio"),
+  label    = c("[1]", "[2]", "[3]", "[4]")
+)
+
 combined_graph_2 <- ggplot(combinedData2, aes(x = Value, y = Power,
                                              group = Method, color = Method)) +
   geom_line(linewidth = .7) + theme(text = element_text(size = 15)) +
   facet_wrap(~Variable, scales = "free_x",
              labeller = as_labeller(latex_labels_2, label_parsed)) +
-  theme(strip.text = element_text(size = 15))
+  theme(strip.text = element_text(size = 15)) +
+  geom_text(data = label_df2, aes(label = label),
+            x = -Inf,    # left edge of each facet
+            y = -Inf,    # bottom edge of each facet
+            hjust = -0.1, # slight shift inward from the margin
+            vjust = -0.5, # slight shift upward from the margin
+            size  = 3.5,
+            inherit.aes = FALSE)
 
 combined_graph_2
 
