@@ -27,19 +27,19 @@ ncpEqualDataLong$alpha_char <- factor(ncpEqualDataLong$alpha_char,
                                                  '0.05' = parse(text = TeX('$\\alpha =$ 0.05')),
                                                  '0.1' = parse(text = TeX('$\\alpha =$ 0.1'))))
 
-figure2 <- ggplot(data = ncpEqualDataLong,
+figure1 <- ggplot(data = ncpEqualDataLong,
                   aes(x = NCP, y = Power, color = `Design Method`)) +
   geom_point() + facet_wrap(~alpha_char, labeller = label_parsed) +
   xlab(TeX("Non-Centrality Parameter")) +
   ylab(TeX("Statistical Power")) +
-  scale_color_manual(labels = c(TeX("Method 3: Single 1-DF"),
-                                TeX("Method 4: Disjunctive 2-DF")),
+  scale_color_manual(labels = c(TeX("Single Weighted 1-DF"),
+                                TeX("Disjunctive 2-DF")),
                      values = c("blue", "violet")) +
   theme(text = element_text(size = 25))
 
 # Saving figure 2 as png
-ggsave(filename = "./MathematicalComparisons/Output/Figure2.png",
-       plot = figure2,
+ggsave(filename = "./MathematicalComparisons/Output/Figure1.png",
+       plot = figure1,
        width  = 5000, height = 3000, units  = "px")
 
 # Checking to ensure Method 3 is always more powerful (it is)
