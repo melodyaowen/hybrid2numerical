@@ -43,7 +43,7 @@ create_standardized_table <- function(file_in = NA,
     group_by(group_id) %>%
     mutate(across(contains("method"),
                   ~ if_else(.x == 0, "0%",  # the special case: just "0%"
-                            paste0(round(.x/n*100, 2), "% (n = ", .x, ")"))))
+                            paste0(round(.x/n*100, 0), "% (n = ", .x, ")"))))
 
   write.csv(tableDat,
             file = paste0("./StandardizedTables/", file_out))
