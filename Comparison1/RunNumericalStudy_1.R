@@ -1,7 +1,7 @@
 source("./RequiredPackages.R")
-source("./Comparison2/Method5_2sided_T.R")
+source("./Comparison1/Method5_2sided_T.R")
 
-# "Comparison 2"
+# "Comparison 1"
 # "2-sided" comparison using the F-distribution and t-distribution
 # Method 5 is two 2-sided tests, we use a new function defined for this purpose
 # and not the package function
@@ -119,7 +119,7 @@ mostPowerful <- powerTable %>%
 
 View(mostPowerful)
 
-write.csv(mostPowerful, file = "./Comparison2/Results2/MostPowerful_2.csv")
+write.csv(mostPowerful, file = "./Comparison1/Results1/MostPowerful_1.csv")
 
 # Frequency of how many times a method is least powerful
 leastPowerful <- powerTable %>%
@@ -139,7 +139,7 @@ leastPowerful <- powerTable %>%
   mutate(Percent = paste0(round((n/nrow(numParameters))*100, 2), "%"))
 
 View(leastPowerful)
-write.csv(leastPowerful, file = "./Comparison2/Results2/LeastPowerful_2.csv")
+write.csv(leastPowerful, file = "./Comparison1/Results1/LeastPowerful_1.csv")
 
 # Power Histogram --------------------------------------------------------------
 
@@ -155,7 +155,7 @@ powerLong <- powerTable %>%
                                      "1. P-Value Adjustment (D/AP)" = "method1_dap",
                                      "2. Combined Outcomes" = "method2",
                                      "3. Single Weighted 1-DF Test" = "method3",
-                                     "4. Disjunctive 2-DF" = "method4_F",
+                                     "4. Disjunctive 2-DF Test" = "method4_F",
                                      "5. Conjunctive IU Test (t-Dist)" = "method5_T"))
 
 summaryStats <- powerLong %>%
@@ -183,7 +183,7 @@ powerHistogram <- ggplot(data = powerLong, aes(Power)) +
             size = 4) +
   theme(text = element_text(size = 20))
 
-ggsave(filename = "./Comparison2/Results2/PowerHistogram_2.png",
+ggsave(filename = "./Comparison1/Results1/PowerHistogram_1.png",
        plot = powerHistogram,
        width  = 5000, height = 3000, units  = "px")
 
@@ -217,8 +217,8 @@ rank_summary_melted <- melt(rank_summary_table, id.vars = "Scenario") %>%
   mutate(Method = recode(Method,
                          "method3" = "Single Weighted 1-DF",
                          "method2" = "Combined Outcomes",
-                         "method4_Chi2" = "Disjunctive 2-DF",
-                         "method5_MVN" = "Conjunctive IU (t-Dist)",
+                         "method4_F" = "Disjunctive 2-DF Test",
+                         "method5_T" = "Conjunctive IU (t-Dist)",
                          "method1_dap" = "P-Val Adj. (D/AP)",
                          "method1_sidak" = "P-Val Adj. (Sidak)",
                          "method1_bonf" = "P-Val Adj. (Bonf.)"))
@@ -230,8 +230,8 @@ mean_ranks <- rankData %>%
   mutate(Method = recode(Method,
                          "method3" = "Single Weighted 1-DF",
                          "method2" = "Combined Outcomes",
-                         "method4_Chi2" = "Disjunctive 2-DF",
-                         "method5_MVN" = "Conjunctive IU (t-Dist)",
+                         "method4_F" = "Disjunctive 2-DF Test",
+                         "method5_T" = "Conjunctive IU (t-Dist)",
                          "method1_dap" = "P-Val Adj. (D/AP)",
                          "method1_sidak" = "P-Val Adj. (Sidak)",
                          "method1_bonf" = "P-Val Adj. (Bonf.)"))
@@ -255,7 +255,7 @@ rankHeatmap <- ggplot(rank_summary_melted, aes(x = Method, y = Scenario, fill = 
   annotation_custom(grob = table_grob,
                     xmin = 7.5, xmax = 10, ymin = -400, ymax = 600)
 
-ggsave(filename = "./Comparison2/Results2/RankHeatmap_2.png",
+ggsave(filename = "./Comparison1/Results1/RankHeatmap_1.png",
        plot = rankHeatmap,
        width  = 5000, height = 2500, units  = "px")
 
@@ -375,8 +375,8 @@ allBestCases <- allBest %>%
 #View(allBestRaw)
 #View(allBestCases)
 
-write.csv(allBestRaw, file = "./Comparison2/Results2/BestAll_2.csv")
-write.csv(allBestCases, file = "./Comparison2/Results2/BestAllCases_2.csv")
+write.csv(allBestRaw, file = "./Comparison1/Results1/BestAll_1.csv")
+write.csv(allBestCases, file = "./Comparison1/Results1/BestAllCases_1.csv")
 
 # Result table based on standardized effect sizes ------------------------------
 
@@ -467,5 +467,5 @@ allBestCases_std <- allBest_std %>%
                           paste0(round(.x/n*100, 0), "% (n = ", .x, ")"))))
 
 
-write.csv(allBestRaw_std, file = "./Comparison2/Results2/BestAll_2_STD.csv")
-write.csv(allBestCases_std, file = "./Comparison2/Results2/BestAllCases_2_STD.csv")
+write.csv(allBestRaw_std, file = "./Comparison1/Results1/BestAll_1_STD.csv")
+write.csv(allBestCases_std, file = "./Comparison1/Results1/BestAllCases_1_STD.csv")
