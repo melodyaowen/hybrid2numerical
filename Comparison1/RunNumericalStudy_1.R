@@ -187,6 +187,26 @@ ggsave(filename = "./Comparison1/Results1/PowerHistogram_1.png",
        plot = powerHistogram,
        width  = 5000, height = 3000, units  = "px")
 
+powerDensity <- ggplot(data = powerLong, aes(Power)) +
+  geom_density(adjust = 2, fill="blue", alpha=.5) +
+  facet_wrap(~`Method Label`) +
+  ylab("Probability Density") +
+  xlab("Statistical Power") +
+  geom_text(data = summaryStats,
+            aes(x = -Inf, y = Inf,
+                label = paste0("Mean: ", Mean,
+                               "   Min: ", Min,
+                               "   Max: ", Max
+                )
+            ),
+            hjust = -0.5, vjust = 1.5,
+            size = 4) +
+  theme(text = element_text(size = 20))
+
+ggsave(filename = "./Comparison1/Results1/PowerDensity_1.png",
+       plot = powerDensity,
+       width  = 5000, height = 3000, units  = "px")
+
 # Ranking Heatmap --------------------------------------------------------------
 rankData <- powerTable %>%
   dplyr::select(Scenario, starts_with("method")) %>%
@@ -469,3 +489,256 @@ allBestCases_std <- allBest_std %>%
 
 write.csv(allBestRaw_std, file = "./Comparison1/Results1/BestAll_1_STD.csv")
 write.csv(allBestCases_std, file = "./Comparison1/Results1/BestAllCases_1_STD.csv")
+
+# Analyzing CONJ vs. BONF ------------------------------------------------------
+
+# Vector of methods we want for this method (bonf and conj)
+power15_names <- c("method1_bonf", "method5_T")
+
+# Full power table with just most powerful methods
+power15_table <- powerTable %>%
+  dplyr::select(Scenario, K, m, beta1, beta2, varY1, varY2, rho01, rho02,
+                rho1, rho2, alpha, r, all_of(power15_names)) %>%
+  rowwise() %>%
+  mutate(rho02minus01 = rho02 - rho01,
+         effect1std = round(beta1/sqrt(varY1), 2),
+         effect2std = round(beta2/sqrt(varY2), 2),
+         eff2minus1 = effect2std - effect1std,
+         mostPower = max(c_across(all_of(power15_names)))) %>%
+  ungroup() %>%
+  mutate(
+    eff2minus1_group = case_when(
+      eff2minus1 < 0 ~ "-",
+      eff2minus1 == 0 ~ "0",
+      eff2minus1 > 0    & eff2minus1 <= 0.19 ~ "0.05 to 0.19",
+      eff2minus1 > 0.19 & eff2minus1 <= 0.29 ~ "0.20 to 0.29",
+      eff2minus1 > 0.29 & eff2minus1 <= 0.39 ~ "0.30 to 0.39",
+      eff2minus1 > 0.39 & eff2minus1 <= 0.49 ~ "0.40 to 0.49",
+      TRUE ~ NA_character_
+    )
+  ) %>%
+  mutate(
+    best = pmap_chr(
+      dplyr::select(cur_data(), starts_with("method")),
+      ~ {
+        rowvals <- c(...)
+        names(rowvals) <- names(dplyr::select(cur_data(), starts_with("method")))
+        tied_methods <- names(rowvals)[rowvals == max(rowvals)]
+        paste(tied_methods, collapse = ", ")
+      }
+    )
+  ) %>%
+  arrange(eff2minus1, rho02minus01) %>%
+  mutate(RhoCase = ifelse(rho01 < rho02, paste0("rho01 < rho02"),
+                          ifelse(rho01 > rho02, paste0("rho01 > rho02"),
+                                 ifelse(rho01 == rho02, paste0("rho01 = rho02"), NA)))) %>%
+  mutate(newID = paste(eff2minus1_group, RhoCase)) %>%
+  group_by(newID) %>%
+  mutate(group_id = cur_group_id()) %>%
+  ungroup()
+
+# Getting counts for groups
+groups15 <- power15_table %>%
+  dplyr::select(Scenario, group_id) %>%
+  group_by(group_id) %>%
+  summarize(n = n())
+
+# Summary data
+power15_table_summary <- power15_table %>%
+  dplyr::select(eff2minus1_group, RhoCase,
+                best, group_id) %>%
+  group_by(group_id, best) %>%
+  mutate(n = n()) %>%
+  distinct() %>%
+  spread(best, n) %>%
+  mutate(across(contains("method"), ~ replace_na(.x, 0))) %>%
+  arrange(group_id) %>%
+  ungroup() %>%
+  dplyr::select(group_id, eff2minus1_group, RhoCase, contains("method")) %>%
+  left_join(., groups15, by = "group_id") %>%
+  rowwise() %>%
+  mutate(across(contains("method"),
+                ~ if_else(.x == 0, "0%",  # the special case: just "0%"
+                          paste0(round(.x/n*100, 0), "% (n = ", .x, ")"))))
+
+
+
+power15_diffs <- powerTable %>%
+  mutate(rho02minus01 = rho02 - rho01,
+         effect1std = round(beta1/sqrt(varY1), 2),
+         effect2std = round(beta2/sqrt(varY2), 2),
+         eff2minus1 = effect2std - effect1std) %>%
+  mutate(RhoCase = ifelse(rho01 < rho02, paste0("rho01 < rho02"),
+                          ifelse(rho01 > rho02, paste0("rho01 > rho02"),
+                                 ifelse(rho01 == rho02, paste0("rho01 = rho02"), NA)))) %>%
+  mutate(
+    eff2minus1_group = case_when(
+      eff2minus1 < 0 ~ "-",
+      eff2minus1 == 0 ~ "0",
+      eff2minus1 > 0    & eff2minus1 <= 0.19 ~ "0.05 to 0.19",
+      eff2minus1 > 0.19 & eff2minus1 <= 0.29 ~ "0.20 to 0.29",
+      eff2minus1 > 0.29 & eff2minus1 <= 0.39 ~ "0.30 to 0.39",
+      eff2minus1 > 0.39 & eff2minus1 <= 0.49 ~ "0.40 to 0.49",
+      TRUE ~ NA_character_
+    )
+  ) %>%
+  dplyr::select(Scenario, K, m, eff2minus1_group, RhoCase, rho1, rho2, method1_bonf, method5_T) %>%
+  mutate(method5minus1 = method5_T - method1_bonf)
+
+power15_diffs_table <- power15_diffs %>%
+  mutate(K = as.character(K),
+         m = as.character(m),
+         rho1 = as.character(rho1),
+         rho2 = as.character(rho2)) %>%
+  pivot_longer(cols = c("K", "m", "eff2minus1_group", "RhoCase", "rho1", "rho2"),
+               names_to = "Parameter", values_to = "Value") %>%
+  arrange(Parameter, Value) %>%
+  relocate(Parameter, Value) %>%
+  group_by(Parameter, Value) %>%
+  dplyr::select(-Scenario, -method1_bonf, -method5_T) %>%
+  dplyr::summarize(meanDiff = round(mean(method5minus1), 1),
+                   minDiff = round(min(method5minus1), 1),
+                   maxDiff = round(max(method5minus1), 1),
+                   varDiff = round(var(method5minus1), 1),
+                   n = n())
+
+# Save Bonf vs. Conj in results
+write.csv(power15_table_summary,
+          file = "./Comparison1/Results1/BONFvsCONJ/BONFvsCONJ_cases_1.csv")
+write.csv(power15_diffs_table,
+          file = "./Comparison1/Results1/BONFvsCONJ/BONFvsCONJ_diffs_1.csv")
+
+# Analyzing CONJ vs. W1DF ------------------------------------------------------
+
+# Vector of methods we want for this method (bonf and conj)
+power35_names <- c("method3", "method5_T")
+
+# Full power table with just most powerful methods
+power35_table <- powerTable %>%
+  dplyr::select(Scenario, K, m, beta1, beta2, varY1, varY2, rho01, rho02,
+                rho1, rho2, alpha, r, all_of(power35_names)) %>%
+  rowwise() %>%
+  mutate(rho02minus01 = rho02 - rho01,
+         effect1std = round(beta1/sqrt(varY1), 2),
+         effect2std = round(beta2/sqrt(varY2), 2),
+         eff2minus1 = effect2std - effect1std,
+         mostPower = max(c_across(all_of(power35_names)))) %>%
+  ungroup() %>%
+  mutate(
+    eff2minus1_group = case_when(
+      eff2minus1 < 0 ~ "-",
+      eff2minus1 == 0 ~ "0",
+      eff2minus1 > 0    & eff2minus1 <= 0.19 ~ "0.05 to 0.19",
+      eff2minus1 > 0.19 & eff2minus1 <= 0.29 ~ "0.20 to 0.29",
+      eff2minus1 > 0.29 & eff2minus1 <= 0.39 ~ "0.30 to 0.39",
+      eff2minus1 > 0.39 & eff2minus1 <= 0.49 ~ "0.40 to 0.49",
+      TRUE ~ NA_character_
+    )
+  ) %>%
+  mutate(
+    best = pmap_chr(
+      dplyr::select(cur_data(), starts_with("method")),
+      ~ {
+        rowvals <- c(...)
+        names(rowvals) <- names(dplyr::select(cur_data(), starts_with("method")))
+        tied_methods <- names(rowvals)[rowvals == max(rowvals)]
+        paste(tied_methods, collapse = ", ")
+      }
+    )
+  ) %>%
+  arrange(eff2minus1, rho02minus01) %>%
+  mutate(RhoCase = ifelse(rho01 < rho02, paste0("rho01 < rho02"),
+                          ifelse(rho01 > rho02, paste0("rho01 > rho02"),
+                                 ifelse(rho01 == rho02, paste0("rho01 = rho02"), NA)))) %>%
+  mutate(newID = paste(eff2minus1_group, RhoCase)) %>%
+  group_by(newID) %>%
+  mutate(group_id = cur_group_id()) %>%
+  ungroup()
+
+# Getting counts for groups
+groups35 <- power35_table %>%
+  dplyr::select(Scenario, group_id) %>%
+  group_by(group_id) %>%
+  summarize(n = n())
+
+# Summary data
+power35_table_summary <- power35_table %>%
+  dplyr::select(eff2minus1_group, RhoCase,
+                best, group_id) %>%
+  group_by(group_id, best) %>%
+  mutate(n = n()) %>%
+  distinct() %>%
+  spread(best, n) %>%
+  mutate(across(contains("method"), ~ replace_na(.x, 0))) %>%
+  arrange(group_id) %>%
+  ungroup() %>%
+  dplyr::select(group_id, eff2minus1_group, RhoCase, contains("method")) %>%
+  left_join(., groups15, by = "group_id") %>%
+  rowwise() %>%
+  mutate(across(contains("method"),
+                ~ if_else(.x == 0, "0%",  # the special case: just "0%"
+                          paste0(round(.x/n*100, 0), "% (n = ", .x, ")"))))
+
+power35_diffs <- powerTable %>%
+  mutate(rho02minus01 = rho02 - rho01,
+         effect1std = round(beta1/sqrt(varY1), 2),
+         effect2std = round(beta2/sqrt(varY2), 2),
+         eff2minus1 = effect2std - effect1std) %>%
+  mutate(RhoCase = ifelse(rho01 < rho02, paste0("rho01 < rho02"),
+                          ifelse(rho01 > rho02, paste0("rho01 > rho02"),
+                                 ifelse(rho01 == rho02, paste0("rho01 = rho02"), NA)))) %>%
+  mutate(
+    eff2minus1_group = case_when(
+      eff2minus1 < 0 ~ "-",
+      eff2minus1 == 0 ~ "0",
+      eff2minus1 > 0    & eff2minus1 <= 0.19 ~ "0.05 to 0.19",
+      eff2minus1 > 0.19 & eff2minus1 <= 0.29 ~ "0.20 to 0.29",
+      eff2minus1 > 0.29 & eff2minus1 <= 0.39 ~ "0.30 to 0.39",
+      eff2minus1 > 0.39 & eff2minus1 <= 0.49 ~ "0.40 to 0.49",
+      TRUE ~ NA_character_
+    )
+  ) %>%
+  dplyr::select(Scenario, K, m, eff2minus1_group, RhoCase, rho1, rho2, method3, method5_T) %>%
+  mutate(method3minus5 = method3 - method5_T)
+
+power35_diffs_table <- power35_diffs %>%
+  mutate(
+    method3minus5_cat = case_when(
+      method3minus5 < 0 ~ "0. CONJ better %",
+      method3minus5 >= 0 & method3minus5 < 5 ~ "1. W1DF - CONJ is 0% to 5%",
+      method3minus5 >= 5 & method3minus5 < 10 ~ "2. W1DF - CONJ is 5% to 10%",
+      method3minus5 >= 10 & method3minus5 < 20 ~ "3. W1DF - CONJ is 10% to 20%",
+      method3minus5 >= 20 ~ "4. W1DF - CONJ is > 20%",
+      TRUE ~ NA_character_
+    )
+  )
+
+power35_summary_counts <- power35_diffs_table %>%
+  group_by(method3minus5_cat) %>%
+  summarize(n = n()); power35_summary_counts
+
+power35_diffs_table_summary <- power35_diffs_table %>%
+  mutate(K = as.character(K),
+         m = as.character(m),
+         rho1 = as.character(rho1),
+         rho2 = as.character(rho2)) %>%
+  pivot_longer(cols = c("K", "m", "eff2minus1_group", "RhoCase", "rho1", "rho2"),
+               names_to = "Parameter", values_to = "Value") %>%
+  arrange(Parameter, Value) %>%
+  relocate(Parameter, Value) %>%
+  group_by(Parameter, Value, method3minus5_cat) %>%
+  dplyr::select(-Scenario, -method3, -method5_T, -method3minus5) %>%
+  dplyr::summarize(n = n()) %>%
+  pivot_wider(names_from = method3minus5_cat, values_from = n, values_fill = 0) %>%
+  mutate(n = rowSums(across(ends_with("%"), as.numeric))) %>%
+  mutate(across(ends_with("%"),
+                ~ sprintf("%.1f%%", . / n * 100),
+                .names = "{.col}"))
+
+# Save Single wighted vs. Conj in results
+write.csv(power35_table_summary,
+          file = "./Comparison1/Results1/W1DFvsCONJ/W1DFvsCONJ_cases_1.csv")
+write.csv(power35_diffs_table_summary,
+          file = "./Comparison1/Results1/W1DFvsCONJ/W1DFvsCONJ_diffs_1.csv")
+
+
