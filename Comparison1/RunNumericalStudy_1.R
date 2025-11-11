@@ -7,7 +7,7 @@ source("./Comparison1/Method5_2sided_T.R")
 # and not the package function
 
 # Table of all Parameters ------------------------------------------------------
-numParameters <- expand.grid(K = c(4, 6, 8, 10),
+numParameters <- expand.grid(K = c(4, 6, 8, 10, 20, 30),
                              m = c(50, 70, 100),
                              betas = c(paste("0.1 0.4"),
                                        paste("0.2 0.4"),
@@ -83,8 +83,8 @@ powerTable <- numParameters %>%
                                                    r = r, dist = "T")) %>%
   mutate_at(vars(contains('method')), funs(.*100))
 
-View(head(powerTable))
-View(head(numParameters))
+#View(head(powerTable))
+#View(head(numParameters))
 nrow(numParameters)
 
 # Check for cases where power is 100
@@ -94,7 +94,7 @@ scenarios100 <- powerTable %>%
                          method4_F, method5_T), ~ . == 100))
 
 nrow(scenarios100)
-View(scenarios100)
+#View(scenarios100)
 
 # Most and Least Powerful Tables -----------------------------------------------
 # Frequency of how many times a method is the most powerful
@@ -117,7 +117,7 @@ mostPowerful <- powerTable %>%
   complete(Method_1 = levels(Method_1), fill = list(n = 0)) %>%
   mutate(Percent = paste0(round((n/nrow(numParameters))*100, 2), "%"))
 
-View(mostPowerful)
+#View(mostPowerful)
 
 write.csv(mostPowerful, file = "./Comparison1/Results1/MostPowerful_1.csv")
 
@@ -138,7 +138,7 @@ leastPowerful <- powerTable %>%
   complete(Method_1 = levels(Method_1), fill = list(n = 0)) %>%
   mutate(Percent = paste0(round((n/nrow(numParameters))*100, 2), "%"))
 
-View(leastPowerful)
+#View(leastPowerful)
 write.csv(leastPowerful, file = "./Comparison1/Results1/LeastPowerful_1.csv")
 
 # Power Histogram --------------------------------------------------------------
@@ -344,9 +344,18 @@ bestSummary <- mostPowerfulFull %>%
   distinct() %>%
   spread(best, n) %>%
   mutate(across(contains("method"), ~ replace_na(.x, 0))) %>%
-  arrange(group_id)
+  arrange(group_id) %>% # NEW
+  rowwise() %>%
+  mutate(method2 = sum(c_across(contains("method2")), na.rm = TRUE),
+         `method2, method3` = sum(c_across(contains("method2, method3")), na.rm = TRUE),
+         method3 = sum(c_across(contains("method3")), na.rm = TRUE),
+         method4 = sum(c_across(contains("method4")), na.rm = TRUE)) %>%
+  dplyr::select(beta1, beta2, varY1, varY2, rho01, rho02, newID, group_id,
+                method2, `method2, method3`, method3, method4) %>%
+  mutate(method2 = method2 - `method2, method3`,
+         method3 = method3 - `method2, method3`)
 
-#View(bestSummary)
+##View(bestSummary)
 
 allBest <- bestSummary %>%
   mutate(beta2minus1 = beta2 - beta1,
@@ -446,7 +455,17 @@ bestSummary_std <- mostPowerfulFull_std %>%
   distinct() %>%
   spread(best, n) %>%
   mutate(across(contains("method"), ~ replace_na(.x, 0))) %>%
-  arrange(group_id)
+  arrange(group_id) %>% # NEW
+  rowwise() %>%
+  mutate(method2 = sum(c_across(contains("method2")), na.rm = TRUE),
+         `method2, method3` = sum(c_across(contains("method2, method3")), na.rm = TRUE),
+         method3 = sum(c_across(contains("method3")), na.rm = TRUE),
+         method4 = sum(c_across(contains("method4")), na.rm = TRUE)) %>%
+  dplyr::select(beta1, beta2, varY1, varY2, rho01, rho02, newID, group_id,
+                effect1std, effect2std, rho02minus01,
+                method2, `method2, method3`, method3, method4) %>%
+  mutate(method2 = method2 - `method2, method3`,
+         method3 = method3 - `method2, method3`)
 
 #View(bestSummary_std)
 

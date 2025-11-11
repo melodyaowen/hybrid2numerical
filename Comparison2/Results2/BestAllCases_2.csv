@@ -1,19 +1,19 @@
-"","BetaCase","VarCase","RhoCase","method2","method2, method3","method3","method3, method4_Chi2","method4_Chi2","n"
-"1","beta1 < beta2","varY1 < varY2","rho01 < rho02","34% (n = 1214)","0%","50% (n = 1818)","0%","16% (n = 568)",3600
-"2","beta1 < beta2","varY1 < varY2","rho01 = rho02","47% (n = 844)","0%","43% (n = 776)","0%","10% (n = 180)",1800
-"3","beta1 < beta2","varY1 < varY2","rho01 > rho02","55% (n = 1962)","0% (n = 7)","15% (n = 524)","0%","31% (n = 1107)",3600
-"4","beta1 < beta2","varY1 = varY2","rho01 < rho02","55% (n = 991)","0% (n = 3)","15% (n = 277)","0%","29% (n = 529)",1800
-"5","beta1 < beta2","varY1 = varY2","rho01 = rho02","0%","55% (n = 493)","0%","0%","45% (n = 407)",900
-"6","beta1 < beta2","varY1 = varY2","rho01 > rho02","0%","0%","31% (n = 564)","0%","69% (n = 1236)",1800
-"7","beta1 < beta2","varY1 > varY2","rho01 < rho02","0%","0%","27% (n = 987)","0% (n = 2)","73% (n = 2611)",3600
-"8","beta1 < beta2","varY1 > varY2","rho01 = rho02","0%","0%","16% (n = 289)","0%","84% (n = 1511)",1800
-"9","beta1 < beta2","varY1 > varY2","rho01 > rho02","0%","0%","2% (n = 76)","0% (n = 1)","98% (n = 3523)",3600
-"10","beta1 = beta2","varY1 < varY2","rho01 < rho02","0%","0%","40% (n = 484)","1% (n = 13)","59% (n = 703)",1200
-"11","beta1 = beta2","varY1 < varY2","rho01 = rho02","0%","0%","86% (n = 516)","0% (n = 1)","14% (n = 83)",600
-"12","beta1 = beta2","varY1 < varY2","rho01 > rho02","0%","2% (n = 28)","89% (n = 1071)","0% (n = 1)","8% (n = 100)",1200
-"13","beta1 = beta2","varY1 = varY2","rho01 < rho02","0%","0%","92% (n = 553)","0%","8% (n = 47)",600
-"14","beta1 = beta2","varY1 = varY2","rho01 = rho02","0%","100% (n = 300)","0%","0%","0%",300
-"15","beta1 = beta2","varY1 = varY2","rho01 > rho02","0%","0%","92% (n = 553)","0%","8% (n = 47)",600
-"16","beta1 = beta2","varY1 > varY2","rho01 < rho02","0%","2% (n = 28)","89% (n = 1071)","0% (n = 1)","8% (n = 100)",1200
-"17","beta1 = beta2","varY1 > varY2","rho01 = rho02","0%","0%","86% (n = 516)","0% (n = 1)","14% (n = 83)",600
-"18","beta1 = beta2","varY1 > varY2","rho01 > rho02","0%","0%","40% (n = 484)","1% (n = 13)","59% (n = 703)",1200
+,BetaCase,VarCase,RhoCase,method2,"method2, method3",method3,method4,n
+1,beta1 < beta2,varY1 < varY2,rho01 < rho02,33%,3%,50%,21%,5400
+2,beta1 < beta2,varY1 < varY2,rho01 = rho02,45%,2%,42%,13%,2700
+3,beta1 < beta2,varY1 < varY2,rho01 > rho02,46%,8%,16%,37%,5400
+4,beta1 < beta2,varY1 = varY2,rho01 < rho02,50%,4%,13%,34%,2700
+5,beta1 < beta2,varY1 = varY2,rho01 = rho02,0%,53%,0%,48%,1350
+6,beta1 < beta2,varY1 = varY2,rho01 > rho02,0%,2%,27%,75%,2700
+7,beta1 < beta2,varY1 > varY2,rho01 < rho02,0%,5%,26%,79%,5400
+8,beta1 < beta2,varY1 > varY2,rho01 = rho02,0%,1%,16%,89%,2700
+9,beta1 < beta2,varY1 > varY2,rho01 > rho02,0%,2%,14%,99%,5400
+10,beta1 = beta2,varY1 < varY2,rho01 < rho02,0%,17%,54%,73%,1800
+11,beta1 = beta2,varY1 < varY2,rho01 = rho02,0%,14%,84%,34%,900
+12,beta1 = beta2,varY1 < varY2,rho01 > rho02,0%,25%,86%,30%,1800
+13,beta1 = beta2,varY1 = varY2,rho01 < rho02,0%,15%,87%,19%,900
+14,beta1 = beta2,varY1 = varY2,rho01 = rho02,0%,100%,0%,2%,450
+15,beta1 = beta2,varY1 = varY2,rho01 > rho02,0%,15%,87%,19%,900
+16,beta1 = beta2,varY1 > varY2,rho01 < rho02,0%,25%,86%,30%,1800
+17,beta1 = beta2,varY1 > varY2,rho01 = rho02,0%,14%,84%,34%,900
+18,beta1 = beta2,varY1 > varY2,rho01 > rho02,0%,17%,54%,73%,1800

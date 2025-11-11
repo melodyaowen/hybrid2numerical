@@ -1,10 +1,10 @@
-"","EffectCase","RhoCase","method2","method2, method3","method2, method4_F","method3","method3, method4_F","method4_F","n"
-"1","beta1/sigma1 < beta2/sigma2","rho01 < rho02","28% (n = 2483)","0% (n = 13)","0% (n = 1)","44% (n = 3923)","0% (n = 1)","29% (n = 2579)",9000
-"2","beta1/sigma1 < beta2/sigma2","rho01 = rho02","20% (n = 909)","14% (n = 628)","0% (n = 1)","32% (n = 1451)","0%","34% (n = 1511)",4500
-"3","beta1/sigma1 < beta2/sigma2","rho01 > rho02","18% (n = 1636)","0%","0%","26% (n = 2367)","0% (n = 4)","55% (n = 4993)",9000
-"4","beta1/sigma1 = beta2/sigma2","rho01 < rho02","0%","0%","0%","95% (n = 571)","0%","5% (n = 29)",600
-"5","beta1/sigma1 = beta2/sigma2","rho01 = rho02","0%","100% (n = 300)","0%","0%","0%","0%",300
-"6","beta1/sigma1 = beta2/sigma2","rho01 > rho02","0%","0%","0%","95% (n = 571)","0%","5% (n = 29)",600
-"7","beta1/sigma1 > beta2/sigma2","rho01 < rho02","0%","0%","0%","78% (n = 1867)","0%","22% (n = 533)",2400
-"8","beta1/sigma1 > beta2/sigma2","rho01 = rho02","0%","0%","0%","98% (n = 1174)","0%","2% (n = 26)",1200
-"9","beta1/sigma1 > beta2/sigma2","rho01 > rho02","27% (n = 651)","1% (n = 15)","0%","70% (n = 1674)","0%","2% (n = 60)",2400
+"","EffectCase","RhoCase","method2","method2, method3","method3","method4","n"
+"1","beta1/sigma1 < beta2/sigma2","rho01 < rho02","25% (n = 3428)","6% (n = 801)","39% (n = 5293)","38% (n = 5094)",13500
+"2","beta1/sigma1 < beta2/sigma2","rho01 = rho02","19% (n = 1312)","15% (n = 1003)","28% (n = 1921)","43% (n = 2872)",6750
+"3","beta1/sigma1 < beta2/sigma2","rho01 > rho02","16% (n = 2151)","3% (n = 459)","27% (n = 3686)","65% (n = 8796)",13500
+"4","beta1/sigma1 = beta2/sigma2","rho01 < rho02","0%","14% (n = 123)","89% (n = 799)","15% (n = 136)",900
+"5","beta1/sigma1 = beta2/sigma2","rho01 = rho02","0%","100% (n = 450)","0% (n = 2)","0% (n = 2)",450
+"6","beta1/sigma1 = beta2/sigma2","rho01 > rho02","0%","14% (n = 123)","89% (n = 799)","15% (n = 136)",900
+"7","beta1/sigma1 > beta2/sigma2","rho01 < rho02","0%","10% (n = 372)","78% (n = 2812)","39% (n = 1419)",3600
+"8","beta1/sigma1 > beta2/sigma2","rho01 = rho02","0%","8% (n = 148)","94% (n = 1687)","12% (n = 220)",1800
+"9","beta1/sigma1 > beta2/sigma2","rho01 > rho02","21% (n = 743)","21% (n = 741)","67% (n = 2400)","16% (n = 563)",3600

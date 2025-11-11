@@ -457,7 +457,8 @@ vars_graph <- ggplot(plotData_Vars, aes(x = VarsRatio, y = Power,
 
 # Varying K -----------------------------------------------------------------
 # Table of all Parameters
-numParameters_K <- expand.grid(K = c(4, 6, 8, 10, 12, 14, 16, 18, 20), #c(4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24),
+numParameters_K <- expand.grid(K = c(4, 6, 8, 10, 12, 14, 16, 18, 20,
+                                     22, 24, 26, 28, 30, 32, 34, 36, 38, 40), #c(4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24),
                                m = 50,
                                betas = c(paste("0.4 0.4")),
                                vars = paste("1 1"),
