@@ -259,7 +259,7 @@ table_grob <- tableGrob(mean_ranks, rows = NULL)
 # Plot with heatmap
 rankHeatmap <- ggplot(rank_summary_melted, aes(x = Method, y = Scenario, fill = value)) +
   geom_tile() +
-  scale_y_continuous(breaks = seq(0, 30000, by = 5000)) +
+  scale_y_continuous(breaks = seq(0, 45000, by = 5000)) +
   xlab("Design Method") +
   ylab("Scenario Index") +
   scale_fill_gradient(
